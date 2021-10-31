@@ -27,7 +27,6 @@ server.listen(PORT, () => {
 
 //==================================================================
 
-const deck = dealer.createDeck();
 let playerSockets = [];
 let players = [];
 let turn_count = 0;
@@ -35,6 +34,7 @@ let player_turn = 0;
 let gameStarted = false;
 let highestBet = 0;
 let raiseTurnCount;
+
 class PLAYER {
     constructor (name,number) {
         this.name = name,
@@ -103,11 +103,18 @@ io.on('connect', (socket) => {
 
         socket.on('startGame',() => {
             gameStarted = true;
-            tableCards = dealer.drawRandomCard(3,deck);
+            dealer.buildDeck();
+            tableCards = dealer.drawCard(5);
+
             playerSockets.forEach(socket => {
-                handCards = dealer.drawRandomCard(2,deck);
-                players[playerSockets.indexOf(socket)].hand = handCards;
-                socket.emit("gameStarted",[tableCards,handCards]);
+                handCards = dealer.drawCard(2);
+
+                if(handCards != false) {
+                    players[playerSockets.indexOf(socket)].hand = handCards;
+                    socket.emit("gameStarted",[tableCards,handCards]);
+                }
+                else
+                    console.log("not enough cards (onStartGame)");
             });
             next_turn();
         });
@@ -116,9 +123,13 @@ io.on('connect', (socket) => {
             //resetTimeOut();
             if(socket.id == playerSockets[player_turn].id) {
                 players[player_turn] = playerData;
-                if(playerData.lastBet > highestBet) highestBet = playerData.lastBet;
+
+                if(playerData.lastBet > highestBet)
+                    highestBet = playerData.lastBet;
+
                 let allPlayersData = getAllPlayersData();
                 console.log("Update status to all players...");
+
                 io.sockets.emit("updateOtherPlayerStatus",[allPlayersData,highestBet]);
                 console.log("Passing Turn...");
                 console.log("=====================");
