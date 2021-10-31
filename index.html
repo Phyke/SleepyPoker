@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            font-size: x-large;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>POKER GAME</h1>
+    <button onclick="startGame()" id="id_button_startGame" style="visibility: hidden;">Start Game</button>
+    <hr>
+    <div>
+        <div>
+            Your player Number : <span id="id_text_playerNo"></span>
+        </div>
+        <div>
+            <p>Current Players status :</p>
+            <ul id="id_list_status">
+                
+            </ul>
+        </div>
+        <div style="float: right;border-style: dashed;">
+            <span id="id_text_turnStatus" style="font-size: 100px;"></span>
+        </div>
+        <div id="id_zone_table">
+            <p>Table Cards :</p>
+        </div>
+        <hr>
+        <div id="id_zone_hand">
+            <p>Your Hand :</p>
+        </div>
+        <hr>
+        <div id="id_zone_action" style="visibility: hidden;">
+            <p>Choose Your action :</p>
+            <button onclick="fold()" id="id_button_fold">Fold</button>
+            <button onclick="check()" id="id_button_check">Check</button>
+            <button onclick="call()" id="id_button_call">Call</button><br>
+            <button onclick="raise()" id="id_button_raise">Raise</button>
+            <input id="id_input_raiseValue" type="number">
+        </div>
+        <hr>
+        <p>Debug output zone</p>
+        <div id="id_zone_output"></div>
+        YourAction:<div id="id_text_yourAction"></div>
+    </div>
+    
+    <script src="card.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>
