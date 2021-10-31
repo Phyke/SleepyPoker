@@ -28,23 +28,22 @@ server.listen(PORT, () => {
 //==================================================================
 
 const deck = dealer.createDeck();
+let playerSockets = [];
 let players = [];
-let playerDataList = [];
 let turn_count = 0;
 let player_turn = 0;
 let gameStarted = false;
 let highestBet = 0;
 let raiseTurnCount;
 class PLAYER {
-    constructor (name,number,socket) {
+    constructor (name,number) {
         this.name = name,
         this.number = number,
         this.lastAction = null,
         this.lastBet = null,
         this.status = null,
         this.wallet = 100,
-        this.hand = null,
-        this.socket = socket
+        this.hand = null
     }
 }
 //let timeOut;
@@ -52,11 +51,11 @@ class PLAYER {
 
 function next_turn(){
     player_turn = (player_turn+1) % players.length;
-    if(playerDataList[player_turn].folded == true) {
+    while(players[player_turn].folded == true) {
         turn_count++;
         player_turn = (player_turn+1) % players.length;
     }
-    players[player_turn].emit('requestAction');
+    playerSockets[player_turn].emit('requestAction');
     console.log("turn count = " , turn_count);
     console.log("player turn = " , player_turn);
     turn_count++;
@@ -79,11 +78,7 @@ function resetTimeOut(){
 function getAllPlayersData() {
     let allPlayersData = [];
     for(let i = 0; i < players.length; i++){
-        console.log("======");
-        console.log(players[i].id);
-        console.log(playerDataList[i]);
-        console.log("======");
-        allPlayersData.push(playerDataList[i]);
+        allPlayersData.push(players[i]);
     }
     return allPlayersData;
 }
@@ -100,27 +95,26 @@ io.on('connect', (socket) => {
     }
     else{
         socket.on("joinGame",(username)=>{
-            
-            let newPlayer = new PLAYER(username,players.length,null);
+            playerSockets.push(socket);
+            let newPlayer = new PLAYER(username,players.length);
             players.push(newPlayer);
             socket.emit('takeSeat',newPlayer);
-            console.log("test");
         });
 
         socket.on('startGame',() => {
             gameStarted = true;
             tableCards = dealer.drawRandomCard(3,deck);
-
-            players.forEach(player => {
-                player.hand = dealer.drawRandomCard(2,deck);
-                player.socket.emit("gameStarted",[tableCards,handCards]);
+            playerSockets.forEach(socket => {
+                handCards = dealer.drawRandomCard(2,deck);
+                players[playerSockets.indexOf(socket)].hand = handCards;
+                socket.emit("gameStarted",[tableCards,handCards]);
             });
             next_turn();
         });
     
         socket.on('passTurn',(playerData) => {
             //resetTimeOut();
-            if(socket.id == players[player_turn].socket.id) {
+            if(socket.id == playerSockets[player_turn].id) {
                 players[player_turn] = playerData;
                 if(playerData.lastBet > highestBet) highestBet = playerData.lastBet;
                 let allPlayersData = getAllPlayersData();
@@ -133,8 +127,8 @@ io.on('connect', (socket) => {
         });
     
         socket.on('disconnect', () => {
-            players.splice(players.indexOf(players.socket,1));
-            playerDataList.splice(players.indexOf(socket,1));
+            players.splice(players.indexOf(socket,1));
+            playerSockets.splice(players.indexOf(socket,1));
             console.log('A user disconnected from the game.');
             if(players.length==0){
                 turn_count = 0;
