@@ -27,7 +27,6 @@ server.listen(PORT, () => {
 
 //==================================================================
 
-const deck = dealer.createDeck();
 let players = [];
 let playerDataList = [];
 let turn_count = 0;
@@ -35,6 +34,7 @@ let player_turn = 0;
 let gameStarted = false;
 let highestBet = 0;
 let raiseTurnCount;
+
 class PLAYER {
     constructor (name,number,socket) {
         this.name = name,
@@ -52,10 +52,12 @@ class PLAYER {
 
 function next_turn(){
     player_turn = (player_turn+1) % players.length;
-    if(playerDataList[player_turn].folded == true) {
+
+    while(playerDataList[player_turn].folded == true) {
         turn_count++;
         player_turn = (player_turn+1) % players.length;
     }
+
     players[player_turn].emit('requestAction');
     console.log("turn count = " , turn_count);
     console.log("player turn = " , player_turn);
@@ -100,31 +102,40 @@ io.on('connect', (socket) => {
     }
     else{
         socket.on("joinGame",(username)=>{
-            
             let newPlayer = new PLAYER(username,players.length,null);
             players.push(newPlayer);
+            
             socket.emit('takeSeat',newPlayer);
             console.log("test");
         });
 
         socket.on('startGame',() => {
             gameStarted = true;
-            tableCards = dealer.drawRandomCard(3,deck);
+            dealer.buildDeck();
+            tableCards = dealer.drawCard(5);
 
             players.forEach(player => {
-                player.hand = dealer.drawRandomCard(2,deck);
-                player.socket.emit("gameStarted",[tableCards,handCards]);
+                player.hand = dealer.drawCard(2);
+                if(player.hand != false)
+                    player.socket.emit("gameStarted",[tableCards,handCards]);
+                else
+                    gameStarted = false;
             });
-            next_turn();
+            if(gameStarted)
+                next_turn();
         });
     
         socket.on('passTurn',(playerData) => {
             //resetTimeOut();
             if(socket.id == players[player_turn].socket.id) {
                 players[player_turn] = playerData;
-                if(playerData.lastBet > highestBet) highestBet = playerData.lastBet;
+
+                if(playerData.lastBet > highestBet)
+                    highestBet = playerData.lastBet;
+
                 let allPlayersData = getAllPlayersData();
                 console.log("Update status to all players...");
+
                 io.sockets.emit("updateOtherPlayerStatus",[allPlayersData,highestBet]);
                 console.log("Passing Turn...");
                 console.log("=====================");

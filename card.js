@@ -89,7 +89,11 @@ function drawCard(drawCount) {
 
     if(drawedCardList.length == drawCount) return drawedCardList;
 
-    else return false;
+    else
+    {
+        console.log("Not enough card to draw, please start game again");
+        return false;
+    }
 }
 
 function printCard(card, targetHtmlElementID, width) {
