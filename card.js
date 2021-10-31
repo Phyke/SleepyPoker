@@ -1,22 +1,42 @@
+const SPADE = 4;
+const HEART = 3;
+const DIAMOND = 2;
+const CLOVER = 1;
+const ACE = 14;
+const KING = 13;
+const QUEEN = 12;
+const JACK = 11;
+
+let deck = [];
+
 class card {
-    constructor(cardName, imgPath) {
-        this.cardName = cardName;
+    constructor(cardSymbol, cardValue, imgPath) {
+        this.cardSymbol = cardSymbol;
+        this.cardValue = cardValue;
         this.imgPath = imgPath;
     }
 }
 
 //creating a deck which represent a physical deck which we can add cards to it or draw cards from it.
 //the physical deck is not contain duplicated cards.
-function createDeck() {
-    const deck = [];
+function buildDeck() {
     const cardType = ["C","D","H","S"];
     const cardValue =  ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
-    for(let i = 0; i < 4; i++) {
-        for(let j = 0; j < 13; j++) {
-            deck.push(new card(cardType[i] + cardValue[j], "c_img/" + cardType[i] + cardValue[j] + ".png"));
+
+    try
+    {
+        for(let i = 0; i < 4; i++) {
+            for(let j = 0; j < 13; j++) {
+                deck.push(new card(i + 1, j + 2, "c_img/" + cardType[i] + cardValue[j] + ".png"));
+            }
         }
     }
-    return deck;
+    catch(err)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 //this function input a card(object) and the array it will be added to (usually a physical deck).
@@ -55,22 +75,27 @@ function drawCard(card, targetArray) {
 //this function input how many cards to draw and the array it will be drawn from (usually a physical deck).
 //this function will not draw furthur if the array is empty.
 //this function return false if can't draw any card. and return array of cards(object) if can draw at least one.
-function drawRandomCard(drawCount, targetArray) {
-    const drawedCardList = [];
-    for(let i = 0; i < drawCount; i++) {
-        if(targetArray.length == 0) break;
-        let randomIndex = Math.floor(Math.random() * targetArray.length);
-        drawedCard = targetArray.splice(randomIndex,1);
+function drawCard(drawCount) {
+    const drawedCard = [];
+
+    for(let i = 0; i < drawCount && deck.length > 0; i++) {
+
+        let randomIndex = Math.floor(Math.random() * deck.length);
+        drawedCard = deck.splice(randomIndex,1);
+        
         console.log("Card " + drawedCard[0].cardName + " is drawn from targetArray");
         drawedCardList.push(drawedCard[0]);
     }
-    if(drawedCardList.length > 0) return drawedCardList;
+
+    if(drawedCardList.length == drawCount) return drawedCardList;
+
     else return false;
 }
 
 function printCard(card, targetHtmlElementID, width) {
     const element_target = document.getElementById(targetHtmlElementID);
     const element_cardImg = document.createElement("img");
+
     element_cardImg.src = card.imgPath;
     element_cardImg.width = width;
     element_target.appendChild(element_cardImg);
@@ -87,6 +112,6 @@ function printCardArray(cardArray, targetHtmlElementID, width) {
 //printCardArray(drawRandomCard(5,deck),"hand",100);
 
 module.exports = {
-    createDeck,
-    drawRandomCard,
+    buildDeck,
+    drawCard,
 };
