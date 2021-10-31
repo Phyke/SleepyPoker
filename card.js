@@ -76,14 +76,14 @@ function drawCard(card, targetArray) {
 //this function will not draw furthur if the array is empty.
 //this function return false if can't draw any card. and return array of cards(object) if can draw at least one.
 function drawCard(drawCount) {
-    const drawedCard = [];
+    let drawedCardList = [];
 
     for(let i = 0; i < drawCount && deck.length > 0; i++) {
 
         let randomIndex = Math.floor(Math.random() * deck.length);
-        drawedCard = deck.splice(randomIndex,1);
+        let drawedCard = deck.splice(randomIndex,1);
         
-        console.log("Card " + drawedCard[0].cardName + " is drawn from targetArray");
+        console.log("Card " + drawedCard[0].cardSymbol + " " + drawedCard[0].cardValue + " is drawn from targetArray");
         drawedCardList.push(drawedCard[0]);
     }
 
