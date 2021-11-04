@@ -96,6 +96,12 @@ function drawCard(drawCount) {
     }
 }
 
+function cardSortProperty(A, B) {
+    if(A.cardValue != B.cardValue)
+        return A.cardValue - B.cardValue;
+    return B.cardSymbol - A.cardSymbol;
+}
+
 function printCard(card, targetHtmlElementID, width) {
     const element_target = document.getElementById(targetHtmlElementID);
     const element_cardImg = document.createElement("img");
