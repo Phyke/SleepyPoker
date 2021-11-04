@@ -30,7 +30,7 @@ server.listen(PORT, () => {
 let playerSockets = [];
 let players = [];
 let turn_count = 0;
-let player_turn = 0;
+let player_turn = 2;
 let gameStarted = false;
 let highestBet = 0;
 let raiseTurnCount;
