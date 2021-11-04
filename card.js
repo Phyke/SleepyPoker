@@ -15,6 +15,36 @@ class card {
         this.cardValue = cardValue;
         this.imgPath = imgPath;
     }
+
+}
+
+function cardSortProperty(A, B) {
+    if(A.cardValue != B.cardValue)
+        return A.cardValue - B.cardValue;
+    return B.cardSymbol - A.cardSymbol;
+}
+
+function scoreCount (hand) {
+    let hist = []
+    let flush = true, straight = true;
+    
+    for(let i = 1; i < 5; i++) {
+        if(hand[i].cardSymbol != hand[0].cardSymbol)
+            flush = false;
+        if(hand[i].cardValue - hand[i - 1].cardValue != 1)
+            straight = false;
+    }
+    if(flush && straight)
+        return 8;
+    if(flush)
+        return 5;
+    if(straight)
+        return 4;
+    return 0;
+}
+
+function pairHistogram (hand) {
+    let hist = [];
 }
 
 //creating a deck which represent a physical deck which we can add cards to it or draw cards from it.
@@ -96,13 +126,7 @@ function drawCard(drawCount) {
     }
 }
 
-function cardSortProperty(A, B) {
-    if(A.cardValue != B.cardValue)
-        return A.cardValue - B.cardValue;
-    return B.cardSymbol - A.cardSymbol;
-}
-
-function printCard(card, targetHtmlElementID, width) {
+function printCard (card, targetHtmlElementID, width) {
     const element_target = document.getElementById(targetHtmlElementID);
     const element_cardImg = document.createElement("img");
 
@@ -111,9 +135,14 @@ function printCard(card, targetHtmlElementID, width) {
     element_target.appendChild(element_cardImg);
 }
 
-function printCardArray(cardArray, targetHtmlElementID, width) {
+function printCardArray (cardArray, targetHtmlElementID, width) {
     for(let i = 0; i < cardArray.length; i++)
         printCard(cardArray[i], targetHtmlElementID, width)
+}
+
+function handScoreCalc (playerHand) {
+    playerHand.sort(cardSortProperty);
+
 }
 
 //printCard(deck[0],"table",100);
