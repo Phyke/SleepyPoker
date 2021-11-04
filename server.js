@@ -1,4 +1,5 @@
 //dependencies
+const { table } = require('console');
 const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
@@ -33,14 +34,15 @@ let turn_count = 0;
 let player_turn = 0;
 let gameStarted = false;
 let highestBet = 0;
+let minimumBet = 20;
 let raiseTurnCount;
 
 class PLAYER {
     constructor (name,number) {
         this.name = name,
         this.number = number,
-        this.lastAction = null,
-        this.lastBet = null,
+        this.lastAction = "None",
+        this.lastBet = 0,
         this.status = null,
         this.wallet = 100,
         this.hand = null
@@ -106,16 +108,24 @@ io.on('connect', (socket) => {
             dealer.buildDeck();
             tableCards = dealer.drawCard(5);
 
+            player_turn = (player_turn+1) % players.length;
+            players[player_turn].lastBet = minimumBet/2;
+            playerSockets[player_turn].emit("blindBet",minimumBet/2);
+            player_turn = (player_turn+1) % players.length;
+            players[player_turn].lastBet = minimumBet;
+            playerSockets[player_turn].emit("blindBet",minimumBet);
+            io.sockets.emit("setupStartGame",[getAllPlayersData(),minimumBet]);
             playerSockets.forEach(socket => {
                 handCards = dealer.drawCard(2);
 
                 if(handCards != false) {
                     players[playerSockets.indexOf(socket)].hand = handCards;
-                    socket.emit("gameStarted",[tableCards,handCards]);
+                    socket.emit("gameStarted",[tableCards.slice(0,3),handCards]);
                 }
                 else
                     console.log("not enough cards (onStartGame)");
             });
+            
             next_turn();
         });
     
@@ -127,10 +137,10 @@ io.on('connect', (socket) => {
                 if(playerData.lastBet > highestBet)
                     highestBet = playerData.lastBet;
 
-                let allPlayersData = getAllPlayersData();
+                let lastPlayerData = [playerData.number,playerData.lastAction,playerData.lastBet];
                 console.log("Update status to all players...");
 
-                io.sockets.emit("updateOtherPlayerStatus",[allPlayersData,highestBet]);
+                io.sockets.emit("updateLastPlayerStatus",[lastPlayerData,highestBet]);
                 console.log("Passing Turn...");
                 console.log("=====================");
                 next_turn();
@@ -142,6 +152,7 @@ io.on('connect', (socket) => {
             playerSockets.splice(players.indexOf(socket,1));
             console.log('A user disconnected from the game.');
             if(players.length==0){
+                player_turn = 0;
                 turn_count = 0;
                 gameStarted = false;
             }

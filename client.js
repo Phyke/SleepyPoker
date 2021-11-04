@@ -10,8 +10,10 @@ joinGame();
 socket.on("cantJoin", () => {document.write("The game has already started.");});
 socket.on("takeSeat", (playerData) => {onTakeSeat(playerData);});
 socket.on("gameStarted", (cardsData) => {cardDisplay(cardsData);});
+socket.on("blindBet", (betValue) => {setBlindBet(betValue)});
 socket.on("requestAction", () => {requestAction();});
-socket.on("updateOtherPlayerStatus", (newPlayerData_Bet) => {updateOtherPlayerStatus(newPlayerData_Bet);});
+socket.on("setupStartGame", (startGameData) => {setupStartGame(startGameData);});
+socket.on("updateLastPlayerStatus", (lastPlayerData_highestBet) => {updateLastPlayerStatus(lastPlayerData_highestBet);});
 
 function joinGame() {
     const name = prompt("Please enter your name.");
@@ -31,20 +33,29 @@ function cardDisplay(data) {
     printCardArray(data[0],"id_zone_table",100);
     printCardArray(data[1],"id_zone_hand",100);
 }
-function requestAction() {
-        text_turnStatus.innerHTML = "Now is your turn!!!";
-        zone_action.style.visibility = "visible";
+function setBlindBet(data) {
+    playerData.lastBet = data;
 }
-function updateOtherPlayerStatus(data) {
-        playerDataList = data[0];
-        highestBet = data[1];
-        list_status.innerHTML = "";
-        playerDataList.forEach(playerData => {
-            let new_listItem = document.createElement("li");
-            new_listItem.innerHTML = "Player " + playerData.number + " : " + playerData.lastAction + " , " + playerData.lastBet;
-            list_status.appendChild(new_listItem);
-        });
-        text_turnStatus.innerHTML = highestBet + "Waiting for other players";
+function requestAction() {
+    text_turnStatus.innerHTML = "Now is your turn!!!";
+    zone_action.style.visibility = "visible";
+}
+function setupStartGame(data) {
+    playerDataList = data[0];
+    highestBet = data[1];
+    playerDataList.forEach(playerData => {
+        let new_listItem = document.createElement("li");
+        new_listItem.innerHTML = "Player " + playerData.number + " : " + playerData.lastAction + " , " + playerData.lastBet;
+        list_status.appendChild(new_listItem);
+    });
+    text_turnStatus.innerHTML = "Waiting for other players";
+}
+
+function updateLastPlayerStatus(data) {
+    highestBet = data[1];
+    listItems = list_status.querySelectorAll("li");
+    listItems[data[0][0]].innerHTML = "Player " + data[0][0] + " : " + data[0][1] + " , " + data[0][2];
+    text_turnStatus.innerHTML = "Waiting for other players";
 }
 
 function fold() {
@@ -68,6 +79,9 @@ function check() {
 function call() {
     if(playerData.wallet < highestBet) {
         alert("You don't have enough money.");
+    }
+    if(playerData.lastBet == highestBet) {
+        alert("You need to check (not call).");
     }
     else {
         playerData.lastAction = "Call";
