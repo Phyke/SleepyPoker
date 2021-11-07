@@ -45,7 +45,9 @@ class PLAYER {
         this.lastBet = 0,
         this.status = null,
         this.wallet = 100,
-        this.hand = null
+        this.hand = null,
+        this.cardValueHist = [, , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        this.cardSymbolHist = [, 0, 0, 0, 0]
     }
 }
 //let timeOut;

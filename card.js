@@ -2,12 +2,25 @@ const SPADE = 4;
 const HEART = 3;
 const DIAMOND = 2;
 const CLOVER = 1;
+
 const ACE = 14;
 const KING = 13;
 const QUEEN = 12;
 const JACK = 11;
 
+const STRAIGHT_FLUSH = 8;
+const FOUR_OAK = 7;
+const FULL_HOUSE = 6;
+const FLUSH = 5;
+const STRAIGHT = 4;
+const THREE_OAK = 3;
+const TWO_PAIR = 2;
+const PAIR = 1;
+const HIGH_CARD = 0;
+
 let deck = [];
+let cardValueHistogram = [];
+let cardSymbolHistogram = [];
 
 class card {
     constructor(cardSymbol, cardValue, imgPath) {
@@ -15,7 +28,6 @@ class card {
         this.cardValue = cardValue;
         this.imgPath = imgPath;
     }
-
 }
 
 function cardSortProperty(A, B) {
@@ -24,28 +36,67 @@ function cardSortProperty(A, B) {
     return B.cardSymbol - A.cardSymbol;
 }
 
-function scoreCount (hand) {
-    let hist = []
+function cardValueHistDetect (cardValueHist) {
+    let max = Math.max(...cardValueHist);
+    console.log("Maximum value in value histogram is ", max);
+    if(max >= 4)
+        return [FOUR_OAK, cardValueHist.LastindexOf(max)];
+    if(max == 3)
+    {
+        let THREE_OAK_Value = cardValueHist.LastindexOf(3);
+        let temp = cardValueHist.splice(THREE_OAK_Value, 1);
+        if(temp.includes(2))
+            return [FULL_HOUSE, [THREE_OAK_Value, temp.LastindexOf(2)]];
+        return [THREE_OAK, THREE_OAK_Value];
+    }
+    if(max == 2)
+    {
+        let PAIR_Value = cardValueHist.LastindexOf(2);
+        let temp = cardValueHist.splice(PAIR_Value, 1);
+        if(temp.includes(2))
+            return [TWO_PAIR, [PAIR_Value, temp.LastindexOf(2)]];
+        return [PAIR, PAIR_Value];
+    }
+    return HIGH_CARD;
+}
+
+function cardSymbolHistDetect (cardSymbolHist, cards) {
+    let max = Math.max(...cardSymbolHist);
+    if(max >= 5) {
+        let flushSymbol = cardSymbolHist.indexOf(max);
+        cards = cards.filter(thisCard => thisCard.cardSymbol == flushSymbol)
+    }
+    cards.sort(cardSortProperty);
+    for(let i = cards.length - 1; i > 0; i--) {
+        let seq = 0;
+        if(cards[i].cardValue - cards[i - 1].cardValue == 1) {
+            seq++;
+            if(seq == 5) {
+                if(max >= 5)
+                    return [STRAIGHT_FLUSH, cards[i + 4].cardValue];
+                return [STRAIGHT, cards[i + 4].cardValue];
+            }
+        }
+        else
+            seq = 0;
+    }
+    if(max >= 5)
+        return [FLUSH, cards[-1].cardValue];
+    return HIGH_CARD;
+}
+
+function symbolPatternDetect (hand) {
     let flush = true, straight = true;
     
-    for(let i = 1; i < 5; i++) {
+    /*for(let i = 1; i < 5; i++) {
         if(hand[i].cardSymbol != hand[0].cardSymbol)
             flush = false;
         if(hand[i].cardValue - hand[i - 1].cardValue != 1)
             straight = false;
-    }
-    if(flush && straight)
-        return 8;
-    if(flush)
-        return 5;
-    if(straight)
-        return 4;
-    return 0;
+    }*/
 }
 
-function pairHistogram (hand) {
-    let hist = [];
-}
+
 
 //creating a deck which represent a physical deck which we can add cards to it or draw cards from it.
 //the physical deck is not contain duplicated cards.

@@ -9,7 +9,7 @@ let highestBet = 0;
 joinGame();
 socket.on("cantJoin", () => {document.write("The game has already started.");});
 socket.on("takeSeat", (playerData) => {onTakeSeat(playerData);});
-socket.on("gameStarted", (cardsData) => {cardDisplay(cardsData);});
+socket.on("gameStarted", (cardsData) => {cardRecieveAndDisplay(cardsData);});
 socket.on("blindBet", (betValue) => {setBlindBet(betValue)});
 socket.on("requestAction", () => {requestAction();});
 socket.on("setupStartGame", (startGameData) => {setupStartGame(startGameData);});
@@ -28,11 +28,21 @@ function startGame() {
     socket.emit("startGame");
     button_startGame.style.visibility = "hidden";
 }
-function cardDisplay(data) {
+
+function cardRecieveAndDisplay(data) {
     playerData.hand = data[1];
+    updateCardHist(data[0].concat(data[1]));
     printCardArray(data[0],"id_zone_table",100);
     printCardArray(data[1],"id_zone_hand",100);
 }
+
+function updateCardHist(data) {
+    for(let i = 0; i < data.lenght; i++) {
+        playerData.cardValueHist[data[i].cardValue]++;
+        playerData.cardSymbolHist[data[i].cardSymbol]++;
+    }
+}
+
 function setBlindBet(data) {
     playerData.lastBet = data;
 }
