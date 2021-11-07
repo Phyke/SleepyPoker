@@ -38,23 +38,22 @@ function cardSortProperty(A, B) {
 
 function cardValueHistDetect (cardValueHist) {
     let max = Math.max(...cardValueHist);
-    console.log("Maximum value in value histogram is ", max);
+    console.log("Maximum value in value histogram is %d\n", max);
     if(max >= 4)
-        return [FOUR_OAK, cardValueHist.LastindexOf(max)];
+        return [FOUR_OAK, cardValueHist.lastIndexOf(max)];
     if(max == 3)
     {
-        let THREE_OAK_Value = cardValueHist.LastindexOf(3);
-        let temp = cardValueHist.splice(THREE_OAK_Value, 1);
-        if(temp.includes(2))
-            return [FULL_HOUSE, [THREE_OAK_Value, temp.LastindexOf(2)]];
+        let THREE_OAK_Value = cardValueHist.lastIndexOf(3);
+        if(cardValueHist.includes(2))
+            return [FULL_HOUSE, [THREE_OAK_Value, cardValueHist.lastIndexOf(2)]];
         return [THREE_OAK, THREE_OAK_Value];
     }
     if(max == 2)
     {
-        let PAIR_Value = cardValueHist.LastindexOf(2);
-        let temp = cardValueHist.splice(PAIR_Value, 1);
-        if(temp.includes(2))
-            return [TWO_PAIR, [PAIR_Value, temp.LastindexOf(2)]];
+        let PAIR_Value = cardValueHist.lastIndexOf(2);
+        cardValueHist.splice(PAIR_Value, 1);
+        if(cardValueHist.includes(2))
+            return [TWO_PAIR, [PAIR_Value, cardValueHist.lastIndexOf(2)]];
         return [PAIR, PAIR_Value];
     }
     return HIGH_CARD;
