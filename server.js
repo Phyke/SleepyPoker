@@ -46,8 +46,8 @@ class PLAYER {
         this.status = null,
         this.wallet = 100,
         this.hand = null,
-        this.cardValueHist = [, , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        this.cardSymbolHist = [, 0, 0, 0, 0]
+        this.cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        this.cardSymbolHist = [0, 0, 0, 0, 0]
     }
 }
 //let timeOut;
