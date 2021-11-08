@@ -31,11 +31,13 @@ server.listen(PORT, () => {
 let playerSockets = [];
 let players = [];
 let turn_count = 0;
-let player_turn = 2;
+let player_turn = 0;
 let gameStarted = false;
 let highestBet = 0;
 let minimumBet = 20;
 let raiseTurnCount;
+//let timeOut;
+//const MAX_WAITING = 5000;
 
 class PLAYER {
     constructor (name,number) {
@@ -50,8 +52,33 @@ class PLAYER {
         this.cardSymbolHist = [0, 0, 0, 0, 0]
     }
 }
-//let timeOut;
-//const MAX_WAITING = 5000;
+
+io.on('connect', (socket) => {
+    console.log("A user connected to the server : ",socket.id);
+    console.log("Total users now : ",io.engine.clientsCount);
+    if(gameStarted) {
+        console.log("The game has already started.");
+        socket.emit("cantJoin");
+        socket.on('disconnect', () => {console.log('A user disconnected after cant join, due to game already started');});
+    }
+    else {
+        socket.on("joinGame",(username)=>{joinGameS(socket,username);});
+        socket.on('startGame',() => {
+            gameStarted = true;
+            setBlindBetS();
+            sendCardtoPlayers();
+            next_turn();
+        });
+    
+        socket.on('passTurn',(playerData) => {
+            //resetTimeOut();
+            updatePlayerData(socket,playerData);
+            next_turn();
+        });
+    
+        socket.on('disconnect', () => {disconnect(socket);});
+    }
+});
 
 function next_turn(){
     player_turn = (player_turn+1) % players.length;
@@ -87,77 +114,61 @@ function getAllPlayersData() {
     return allPlayersData;
 }
 
-io.on('connect', (socket) => {
-    console.log("A user connected to the server : ",socket.id);
-    console.log("Total users now : ",io.engine.clientsCount);
-    if(gameStarted){
-        console.log("The game has already started.");
-        socket.emit("cantJoin");
-        socket.on('disconnect', () => {
-            console.log('A user disconnected after cant join, due to game already started');
-        });
+function joinGameS(socket,username) {
+    playerSockets.push(socket);
+    let newPlayer = new PLAYER(username,players.length);
+    players.push(newPlayer);
+    socket.emit('takeSeat',newPlayer);
+}
+
+function setBlindBetS() {
+    player_turn = (player_turn+1) % players.length;
+    players[player_turn].lastBet = minimumBet/2;
+    playerSockets[player_turn].emit("blindBet",minimumBet/2);
+    player_turn = (player_turn+1) % players.length;
+    players[player_turn].lastBet = minimumBet;
+    playerSockets[player_turn].emit("blindBet",minimumBet);
+    io.sockets.emit("setupStartGame",[getAllPlayersData(),minimumBet]);
+}
+
+function sendCardtoPlayers() {
+    dealer.buildDeck();
+    tableCards = dealer.drawCard(5);
+    playerSockets.forEach(socket => {
+        handCards = dealer.drawCard(2);
+
+        if(handCards != false) {
+            players[playerSockets.indexOf(socket)].hand = handCards;
+            socket.emit("gameStarted",[tableCards.slice(0,3),handCards]);
+        }
+        else
+            console.log("not enough cards (onStartGame)");
+    });
+}
+
+function updatePlayerData(socket,playerData) {
+    if(socket.id == playerSockets[player_turn].id) {
+        players[player_turn] = playerData;
+
+        if(playerData.lastBet > highestBet)
+            highestBet = playerData.lastBet;
+
+        let lastPlayerData = [playerData.number,playerData.lastAction,playerData.lastBet];
+        console.log("Update status to all players...");
+
+        io.sockets.emit("updateLastPlayerStatus",[lastPlayerData,highestBet]);
+        console.log("Passing Turn...");
+        console.log("=====================");
     }
-    else{
-        socket.on("joinGame",(username)=>{
-            playerSockets.push(socket);
-            let newPlayer = new PLAYER(username,players.length);
-            players.push(newPlayer);
-            socket.emit('takeSeat',newPlayer);
-        });
+}
 
-        socket.on('startGame',() => {
-            gameStarted = true;
-            dealer.buildDeck();
-            tableCards = dealer.drawCard(5);
-
-            player_turn = (player_turn+1) % players.length;
-            players[player_turn].lastBet = minimumBet/2;
-            playerSockets[player_turn].emit("blindBet",minimumBet/2);
-            player_turn = (player_turn+1) % players.length;
-            players[player_turn].lastBet = minimumBet;
-            playerSockets[player_turn].emit("blindBet",minimumBet);
-            io.sockets.emit("setupStartGame",[getAllPlayersData(),minimumBet]);
-            playerSockets.forEach(socket => {
-                handCards = dealer.drawCard(2);
-
-                if(handCards != false) {
-                    players[playerSockets.indexOf(socket)].hand = handCards;
-                    socket.emit("gameStarted",[tableCards.slice(0,3),handCards]);
-                }
-                else
-                    console.log("not enough cards (onStartGame)");
-            });
-            
-            next_turn();
-        });
-    
-        socket.on('passTurn',(playerData) => {
-            //resetTimeOut();
-            if(socket.id == playerSockets[player_turn].id) {
-                players[player_turn] = playerData;
-
-                if(playerData.lastBet > highestBet)
-                    highestBet = playerData.lastBet;
-
-                let lastPlayerData = [playerData.number,playerData.lastAction,playerData.lastBet];
-                console.log("Update status to all players...");
-
-                io.sockets.emit("updateLastPlayerStatus",[lastPlayerData,highestBet]);
-                console.log("Passing Turn...");
-                console.log("=====================");
-                next_turn();
-            }
-        });
-    
-        socket.on('disconnect', () => {
-            players.splice(players.indexOf(socket,1));
-            playerSockets.splice(players.indexOf(socket,1));
-            console.log('A user disconnected from the game.');
-            if(players.length==0){
-                player_turn = 0;
-                turn_count = 0;
-                gameStarted = false;
-            }
-        });
+function disconnect(socket) {
+    players.splice(players.indexOf(socket,1));
+    playerSockets.splice(players.indexOf(socket,1));
+    console.log('A user disconnected from the game.');
+    if(players.length==0){
+        player_turn = 0;
+        turn_count = 0;
+        gameStarted = false;
     }
-});
+}
