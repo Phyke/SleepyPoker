@@ -68,15 +68,15 @@ function cardSymbolHistDetect (cardSymbolHist, cards) {
     cards.sort(cardSortProperty);
     let seq = 0;
     for(let i = cards.length - 1; i > 0; i--) {
-        console.log(i, ' ', cards[i]);
-        console.log(i - 1, ' ', cards[i - 1]);
+        //console.log(i, ' ', cards[i]);
+        //console.log(i - 1, ' ', cards[i - 1]);
         if(cards[i].cardValue - cards[i - 1].cardValue == 1) {
             seq++;
-            console.log('seq ', seq);
+            //console.log('seq ', seq);
             if(seq == 3 && cards[i].cardValue == 3 && cards[cards.length - 1].cardValue == 14) { // A 2 3 4 5
                 if(max >= 5)
-                    return [STRAIGHT_FLUSH, cards[i + 2].cardValue];
-                return [STRAIGHT, cards[i + 2].cardValue];
+                    return [STRAIGHT_FLUSH, 5];
+                return [STRAIGHT, 5];
             }
             if(seq == 4) {
                 if(max >= 5)
