@@ -66,21 +66,24 @@ function cardSymbolHistDetect (cardSymbolHist, cards) {
         cards = cards.filter(thisCard => thisCard.cardSymbol == flushSymbol)
     }
     cards.sort(cardSortProperty);
+    let seq = 0;
     for(let i = cards.length - 1; i > 0; i--) {
-        let seq = 0;
+        console.log(i, ' ', cards[i]);
+        console.log(i - 1, ' ', cards[i - 1]);
         if(cards[i].cardValue - cards[i - 1].cardValue == 1) {
             seq++;
-            if(seq == 5) {
+            console.log(seq);
+            if(seq == 4) {
                 if(max >= 5)
-                    return [STRAIGHT_FLUSH, cards[i + 4].cardValue];
-                return [STRAIGHT, cards[i + 4].cardValue];
+                    return [STRAIGHT_FLUSH, cards[i + 3].cardValue];
+                return [STRAIGHT, cards[i + 3].cardValue];
             }
         }
         else
             seq = 0;
     }
     if(max >= 5)
-        return [FLUSH, cards[-1].cardValue];
+        return [FLUSH, cards[cards.length - 1].cardValue];
     return HIGH_CARD;
 }
 
