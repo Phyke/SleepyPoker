@@ -18,6 +18,8 @@ socket.on("blindBet", (betValue) => {setBlindBet(betValue)});
 socket.on("requestAction", () => {requestAction();});
 socket.on("setupStartGame", (startGameData) => {setupStartGame(startGameData);});
 socket.on("updateLastPlayerStatus", (lastPlayerData_highestBet) => {updateLastPlayerStatus(lastPlayerData_highestBet);});
+socket.on("addTableCard", (nextTableCard) => {addTableCard(nextTableCard);});
+socket.on("gameEnded", () => {gameEnded();});
 
 function joinGame() {
     const name = prompt("Please enter your name.");
@@ -40,6 +42,10 @@ function cardRecieveAndDisplay(data) {
     updateCardHist(data[0].concat(data[1]));
     printCardArray(data[0],"id_zone_table_print",100);
     printCardArray(data[1],"id_zone_hand_print",100);
+}
+
+function addTableCard(data) {
+    printCard(data,"id_zone_table_print",100);
 }
 
 function updateCardHist(data) {
@@ -72,6 +78,11 @@ function updateLastPlayerStatus(data) {
     listItems = list_status.querySelectorAll("li");
     listItems[data[0][0]].innerHTML = "Player " + data[0][0] + " : " + data[0][1] + " , " + data[0][2];
     text_turnStatus.innerHTML = "Waiting for other players";
+}
+
+function gameEnded() {
+    text_turnStatus.innerHTML = "The game is ended.";
+    zone_action.style.visibility = "hidden";
 }
 
 function fold() {

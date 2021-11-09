@@ -2,6 +2,7 @@
 const { table } = require('console');
 const express = require('express');
 const http = require('http');
+const { connect } = require('http2');
 const socketIO = require('socket.io');
 const dealer = require('./card');
 
@@ -33,9 +34,10 @@ let players = [];
 let turn_count = 0;
 let player_turn = 0;
 let gameStarted = false;
-let highestBet = 0;
+let highestBet = 20;
 let minimumBet = 20;
 let raiseTurnCount;
+let roundCount = 0;
 //let timeOut;
 //const MAX_WAITING = 5000;
 
@@ -65,6 +67,7 @@ io.on('connect', (socket) => {
         socket.on("joinGame",(username)=>{joinGameS(socket,username);});
         socket.on('startGame',() => {
             gameStarted = true;
+            raiseTurnCount = players.length;
             setBlindBetS();
             sendCardtoPlayers();
             next_turn();
@@ -73,7 +76,20 @@ io.on('connect', (socket) => {
         socket.on('passTurn',(playerData) => {
             //resetTimeOut();
             updatePlayerData(socket,playerData);
-            next_turn();
+            if(playerData.lastAction == "Raise") raiseTurnCount = players.length - 1;
+            else raiseTurnCount--;
+            console.log("raiseTurnCount = ", raiseTurnCount);
+            if(raiseTurnCount <= 0) {
+                raiseTurnCount = players.length;
+                console.log("reseting raisecount now raiseTurnCount = " , raiseTurnCount);
+                roundCount++;
+                console.log("roundCount = ", roundCount);
+                io.sockets.emit("addTableCard",tableCards[roundCount+2]);
+            }
+
+            if(roundCount == 2) io.sockets.emit("gameEnded");
+            else next_turn();
+            if(raiseTurnCount <= 0) io.sockets.emit("gameEnded"); //special case
         });
     
         socket.on('disconnect', () => {disconnect(socket);});
@@ -84,6 +100,7 @@ function next_turn(){
     player_turn = (player_turn+1) % players.length;
     while(players[player_turn].folded == true) {
         turn_count++;
+        raiseTurnCount--;
         player_turn = (player_turn+1) % players.length;
     }
     playerSockets[player_turn].emit('requestAction');
@@ -169,6 +186,8 @@ function disconnect(socket) {
     if(players.length==0){
         player_turn = 0;
         turn_count = 0;
+        roundCount = 0;
+        raiseTurnCount = null;
         gameStarted = false;
     }
 }
