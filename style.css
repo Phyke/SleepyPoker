@@ -1,0 +1,115 @@
+* {
+    font-size: xx-large;
+    box-sizing: border-box;
+}
+
+html,body {
+    height: 100%;
+    margin: 0;
+}
+
+.row {
+    height: 100%;
+    min-height: 100%;
+}
+
+.column {
+    height: 100%;
+    float: left;
+}
+
+.left, .right {
+    width: 20%;
+    background-color: deepskyblue;
+}
+
+.middle {
+    width: 60%;
+    background-color:lightskyblue;
+}
+
+.cardimg {
+    height: 100%;
+}
+
+.actionButton {
+    width: 40%;
+    height: 25%;
+    margin: 1.5%;
+}
+
+#id_zone_playerInfo {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#id_text_turnStatus {
+    height: 10%;
+    font-size: 75px;
+    text-align: center;
+    background-color: burlywood;
+}
+
+#id_zone_table {
+    height: 30%;
+    padding-top: 10px;
+    text-align: center;
+}
+
+#id_zone_table_label {
+    width: 50%;
+    display: inline-block;
+}
+
+#id_zone_table_print {
+    width: 65%;
+    height: 80%;
+    display: inline-block;
+    border-style: solid;
+}
+
+#id_zone_hand {
+    height: 30%;
+    text-align: center;
+}
+
+#id_zone_hand_label {
+    width: 50%;
+    display: inline-block;
+}
+
+#id_zone_hand_print {
+    width: 30%;
+    height: 80%;
+    display: inline-block;
+    border-style: solid;
+}
+
+#id_zone_action {
+    height: 30%;
+    text-align: center;
+    visibility: hidden;
+}
+
+#id_zone_action_label {
+    width: 50%;
+    display: inline-block;
+}
+
+#id_zone_action_input {
+    width: 50%;
+    height: 80%;
+    display: inline-block;
+    border-style: solid;
+    text-align: center;
+}
+
+#id_zone_otherPlayer {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#id_button_startGame {
+    width: 100%;
+    margin-top: 20px;
+}

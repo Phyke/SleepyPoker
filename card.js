@@ -189,7 +189,8 @@ function printCard (card, targetHtmlElementID, width) {
     const element_cardImg = document.createElement("img");
 
     element_cardImg.src = card.imgPath;
-    element_cardImg.width = width;
+    //element_cardImg.width = width;
+    element_cardImg.className = "cardimg";
     element_target.appendChild(element_cardImg);
 }
 

@@ -21,7 +21,9 @@ function joinGame() {
 }
 function onTakeSeat(data) {
     playerData = data;
+    document.getElementById("id_text_playerName").innerHTML = playerData.name;
     document.getElementById("id_text_playerNo").innerHTML = playerData.number;
+    document.getElementById("id_text_playerWallet").innerHTML = playerData.wallet;
     if(playerData.number == 0) button_startGame.style.visibility = "visible";
 }
 function startGame() {
@@ -32,8 +34,8 @@ function startGame() {
 function cardRecieveAndDisplay(data) {
     playerData.hand = data[1];
     updateCardHist(data[0].concat(data[1]));
-    printCardArray(data[0],"id_zone_table",100);
-    printCardArray(data[1],"id_zone_hand",100);
+    printCardArray(data[0],"id_zone_table_print",100);
+    printCardArray(data[1],"id_zone_hand_print",100);
 }
 
 function updateCardHist(data) {
@@ -114,4 +116,8 @@ function raise() {
         socket.emit("passTurn", playerData);
         zone_action.style.visibility = "hidden";
     }
+}
+
+function allIn() {
+
 }

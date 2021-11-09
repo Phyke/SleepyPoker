@@ -5,58 +5,47 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <style>
-        * {
-            font-size: x-large;
-            align-items: center;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>POKER GAME</h1>
-    <button onclick="startGame()" id="id_button_startGame" style="visibility: hidden;">Start Game</button>
-    <hr>
-    <div>
-        <div>
-            Your player Number : <span id="id_text_playerNo"></span>
+    <div class="row">
+        <div class="column left" id="id_zone_playerInfo">
+            <p>SleepyPoker</p>
+            <p>Your name: <span id="id_text_playerName"></span></p>
+            <p>Your no: <span id="id_text_playerNo"></span></p>
+            <p>Your wallet: <span id="id_text_playerWallet"></span></p>
+            <p>Your last action: <span id="id_text_playerLastAction"></span></p>
         </div>
-        <div>
-            <p>Current Players status :</p>
-            <ul id="id_list_status">
-                
-            </ul>
+        <div class="column middle">
+            <div id="id_text_turnStatus">Welcome</div>
+            <div id="id_zone_table">
+                <div id="id_zone_table_label">Table Card</div><br>
+                <div id="id_zone_table_print"></div>
+            </div>
+            <div id="id_zone_hand">
+                <div id="id_zone_hand_label">Hand Card</div><br>
+                <div id="id_zone_hand_print"></div>
+            </div>
+            <div id="id_zone_action">
+                <div id="id_zone_action_label">Action</div>
+                <div id="id_zone_action_input">
+					<button class="actionButton" onclick="fold()" id="id_button_fold">Fold</button>
+					<button class="actionButton" onclick="check()" id="id_button_check">Check</button><br>
+					<button class="actionButton" onclick="call()" id="id_button_call">Call</button>
+                    <button class="actionButton" onclick="allIn()" id="id_button_allIn">All-In</button><hr style="margin: 0;border-color:black">
+					<button class="actionButton" onclick="raise()" id="id_button_raise">Raise</button>
+					<input class="actionButton" id="id_input_raiseValue" type="number" min="0">
+				</div>
+            </div>
         </div>
-        <div style="float: right;border-style: dashed;">
-            <span id="id_text_turnStatus" style="font-size: 100px;"></span>
+        <div class="column right" id="id_zone_otherPlayer">
+            <button onclick="startGame()" id="id_button_startGame" style="visibility: hidden;">Start Game</button>
+            <p>All player status:</p>
+            <ul id="id_list_status"></ul>
         </div>
-        <div id="id_zone_table">
-            <p>Table Cards :</p>
-        </div>
-        <hr>
-        <div id="id_zone_hand">
-            <p>Your Hand :</p>
-        </div>
-        <hr>
-        <div id="id_zone_action" style="visibility: hidden;">
-            <p>Choose Your action :</p>
-            <button onclick="fold()" id="id_button_fold">Fold</button>
-            <button onclick="check()" id="id_button_check">Check</button>
-            <button onclick="call()" id="id_button_call">Call</button><br>
-            <button onclick="raise()" id="id_button_raise">Raise</button>
-            <input id="id_input_raiseValue" type="number">
-        </div>
-        <hr>
-        <p>Debug output zone</p>
-        <div id="id_zone_output"></div>
-        YourAction:<div id="id_text_yourAction"></div>
     </div>
-    
     <script src="card.js"></script>
     <script src="socket.io/socket.io.js"></script>
     <script src="client.js"></script>
-    <!--<script>
-        let test = drawCard(20);
-        test.sort(cardSortProperty);
-    </script>-->
 </body>
 </html>
