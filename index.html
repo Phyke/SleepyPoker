@@ -15,6 +15,17 @@
             <p>Your no: <span id="id_text_playerNo"></span></p>
             <p>Your wallet: <span id="id_text_playerWallet"></span></p>
             <p>Your last action: <span id="id_text_playerLastAction"></span></p>
+            <button onclick="showGameRules()">Game Rules</button>
+            <dialog id="id_dialog_gameRules" style="margin-top:1%;margin-left: 3%;">
+                <span>Game Rules</span><br>
+                <ol>
+                    <li>First player is the host who can start the game.</li>
+                    <li>Minimum bet is 20$.</li>
+                    <li>Rule 3 lorem ipsum.</li>
+                    <li>Rule 4 lorem ipsum.</li>
+                </ol>
+                <button onclick="closeGameRules()">Close</button>
+            </dialog>
         </div>
         <div class="column middle">
             <div id="id_text_turnStatus">Welcome</div>

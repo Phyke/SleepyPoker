@@ -8,6 +8,7 @@ const text_playerNo         = document.getElementById("id_text_playerNo");
 const text_playerWallet     = document.getElementById("id_text_playerWallet");
 const text_playerLastAction = document.getElementById("id_text_playerLastAction");
 const input_raiseValue      = document.getElementById("id_input_raiseValue");
+const dialog_gameRules      = document.getElementById("id_dialog_gameRules");
 let highestBet = 0;
 
 joinGame();
@@ -135,4 +136,12 @@ function raise() {
 
 function allIn() {
 
+}
+
+function showGameRules() {
+    dialog_gameRules.show();
+}
+
+function closeGameRules() {
+    dialog_gameRules.close();
 }
