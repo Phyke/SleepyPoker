@@ -1,0 +1,127 @@
+let a = [0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+let a = [0,0, 2,2,0,0,0,0,0,3,0,0,0,0,0]  // FH     pass
+let a = [0,0, 2,3,0,0,0,0,0,2,0,0,0,0,0]  // FH     pass
+
+let a = [0,0, 1,1,0,1,0,0,0,4,0,0,0,0,0]  // FOK   pass
+let a = [0,0, 0,0,0,3,0,0,0,4,0,0,0,0,0]  // FOK   pass
+let a = [0,0, 0,0,0,0,0,0,0,0,4,0,0,0,3]  // FOK   pass
+
+let a = [0,0, 1,1,1,1,0,0,0,3,0,0,0,0,0]  // TOK   pass
+let a = [0,0, 1,0,0,3,0,0,0,3,0,0,0,0,0]  // TOK   pass
+
+let a = [0,0, 1,1,1,1,0,1,1,1,0,0,0,0,0]  // HC    pass
+let a = [0,0, 0,1,1,1,0,1,1,1,0,0,0,0,1]  // HC    pass
+
+let a = [0,0, 1,0,0,2,0,0,0,2,0,0,0,0,2]  // TP     pass
+----------------------------------------------------------------------------------------
+cardSymbolHistDetect(a,b)
+let a =[0,0,0,0,0]
+
+let a = [0,0,0,5,0] // SF pass
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(3, 5, ))
+b.push(new card(3, 6, ))
+b.push(new card(3, 7, ))
+cardSymbolHistDetect(a,b)
+
+let a = [0,0,0,4,1] // S pass 
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(4, 5, ))
+b.push(new card(3, 6, ))
+b.push(new card(3, 7, ))
+cardSymbolHistDetect(a,b)
+
+let a = [0,0,0,5,0] // F pass
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(3, 5, ))
+b.push(new card(3, 6, ))
+b.push(new card(3, 8, ))
+cardSymbolHistDetect(a,b)
+
+let a = [0,0,2,3,2] // F 2 pass
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(3, 5, ))
+b.push(new card(3, 6, ))
+b.push(new card(3, 8, ))
+b.push(new card(2, 7, ))
+b.push(new card(2, 8, ))
+cardSymbolHistDetect(a,b)
+
+let a = [0,0,0,7,0] // SF 2 pass
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(3, 5, ))
+b.push(new card(3, 6, ))
+b.push(new card(3, 7, ))
+b.push(new card(3, 8, ))
+b.push(new card(3, 9, ))
+cardSymbolHistDetect(a,b)
+
+let a = [0,0,0,7,0] // SF 3 
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(3, 5, ))
+b.push(new card(3, 6, ))
+b.push(new card(3, 7, ))
+b.push(new card(3, 8, ))
+b.push(new card(2, 9, ))
+cardSymbolHistDetect(a,b)
+
+let a = [0,0,3,4,0] // HC pass
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(2, 5, ))
+b.push(new card(2, 14, ))
+b.push(new card(3, 7, ))
+b.push(new card(3, 8, ))
+b.push(new card(2, 9, ))
+cardSymbolHistDetect(a,b)
+
+let a = [0,0,3,4,0] // HC 2 pass
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(2, 5, ))
+b.push(new card(2, 6, ))
+b.push(new card(3, 8, ))
+b.push(new card(3, 9, ))
+b.push(new card(2, 10, ))
+cardSymbolHistDetect(a,b)
+
+let a = [0,0,0,7,0] // RSF  pass
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(3, 14, ))
+b.push(new card(3, 13, ))
+b.push(new card(3, 12, ))
+b.push(new card(3, 11, ))
+b.push(new card(3, 10, ))
+cardSymbolHistDetect(a,b)
+
+let a = [0,0,0,7,0] // low SF pass
+let b = []
+b.push(new card(3, 3, ))
+b.push(new card(3, 4, ))
+b.push(new card(3, 14, ))
+b.push(new card(3, 2, ))
+b.push(new card(3, 5, ))
+b.push(new card(3, 11, ))
+b.push(new card(3, 10, ))
+cardSymbolHistDetect(a,b)
+
+
+
+
