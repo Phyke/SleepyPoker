@@ -1,9 +1,13 @@
 const socket = io();
-const button_startGame = document.getElementById("id_button_startGame");
-const list_status = document.getElementById("id_list_status");
-const zone_action = document.getElementById("id_zone_action");
-const text_turnStatus = document.getElementById("id_text_turnStatus");
-const input_raiseValue = document.getElementById("id_input_raiseValue");
+const button_startGame      = document.getElementById("id_button_startGame");
+const list_status           = document.getElementById("id_list_status");
+const zone_action           = document.getElementById("id_zone_action");
+const text_turnStatus       = document.getElementById("id_text_turnStatus");
+const text_playerName       = document.getElementById("id_text_playerName");
+const text_playerNo         = document.getElementById("id_text_playerNo");
+const text_playerWallet     = document.getElementById("id_text_playerWallet");
+const text_playerLastAction = document.getElementById("id_text_playerLastAction");
+const input_raiseValue      = document.getElementById("id_input_raiseValue");
 let highestBet = 0;
 
 joinGame();
@@ -21,9 +25,9 @@ function joinGame() {
 }
 function onTakeSeat(data) {
     playerData = data;
-    document.getElementById("id_text_playerName").innerHTML = playerData.name;
-    document.getElementById("id_text_playerNo").innerHTML = playerData.number;
-    document.getElementById("id_text_playerWallet").innerHTML = playerData.wallet;
+    text_playerName.innerHTML = playerData.name;
+    text_playerNo.innerHTML = playerData.number;
+    text_playerWallet.innerHTML = playerData.wallet;
     if(playerData.number == 0) button_startGame.style.visibility = "visible";
 }
 function startGame() {
