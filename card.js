@@ -70,6 +70,10 @@ function cardSymbolHistDetect (cardSymbolHist, cards) {
     for(let i = cards.length - 1; i > 0; i--) {
         //console.log(i, ' ', cards[i]);
         //console.log(i - 1, ' ', cards[i - 1]);
+        while(cards[i].cardValue - cards[i - 1].cardValue == 0)
+            i--;
+        if(i < 1)
+            break;
         if(cards[i].cardValue - cards[i - 1].cardValue == 1) {
             seq++;
             //console.log('seq ', seq);

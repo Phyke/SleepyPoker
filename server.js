@@ -103,7 +103,10 @@ function next_turn(){
         raiseTurnCount--;
         player_turn = (player_turn+1) % players.length;
     }
-    if(raiseTurnCount <= 0) io.sockets.emit("gameEnded");
+    if(raiseTurnCount <= 0) {
+        io.sockets.emit("addTableCard",tableCards[roundCount+3]);
+        io.sockets.emit("gameEnded");
+    }
     else {
         playerSockets[player_turn].emit('requestAction');
         console.log("turn count = " , turn_count);

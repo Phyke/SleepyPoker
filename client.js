@@ -29,6 +29,7 @@ function joinGame() {
 }
 function onTakeSeat(data) {
     playerData = data;
+    console.log(data.cardValueHist);
     text_playerName.innerHTML = playerData.name;
     text_playerNo.innerHTML = playerData.number;
     text_playerWallet.innerHTML = playerData.wallet;
