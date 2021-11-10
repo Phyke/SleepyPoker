@@ -16,7 +16,7 @@ const STRAIGHT = 4;
 const THREE_OAK = 3;
 const TWO_PAIR = 2;
 const PAIR = 1;
-const HIGH_CARD = 0;
+const HIGH_CARD = [0];
 
 let deck = [];
 let cardValueHistogram = [];
@@ -87,8 +87,13 @@ function cardSymbolHistDetect (cardSymbolHist, cards) {
         else
             seq = 0;
     }
-    if(max >= 5)
-        return [FLUSH, cards[cards.length - 1].cardValue];
+    if(max >= 5) {
+        let cardsValueFlush = cards.slice(cards.length - 5, cards.length);
+        cardsValueFlush.reverse();
+        for(let i = 0; i < 5; i++)
+            cardsValueFlush[i] = cardsValueFlush[i].cardValue;
+        return [FLUSH, cardsValueFlush];
+    }
     return HIGH_CARD;
 }
 
@@ -197,6 +202,53 @@ function printCard (card, targetHtmlElementID, width) {
 function printCardArray (cardArray, targetHtmlElementID, width) {
     for(let i = 0; i < cardArray.length; i++)
         printCard(cardArray[i], targetHtmlElementID, width)
+}
+
+function scoreToText(scoreFinal) {
+    if(scoreFinal.length > 1) {
+        if(scoreFinal[1].length > 1) {
+            for(let i = 0; i < scoreFinal[1].length; i++) {
+                if(scoreFinal[1][i] == ACE)
+                    scoreFinal[1][i] = 'A';
+                else if(scoreFinal[1][i] == KING)
+                    scoreFinal[1][i] = 'K';
+                else if(scoreFinal[1][i] == QUEEN)
+                    scoreFinal[1][i] = 'Q';
+                else if(scoreFinal[1][i] == JACK)
+                    scoreFinal[1][i]= 'J';
+            }
+        }
+        else {
+            if(scoreFinal[1] == ACE)
+                scoreFinal[1] = 'A';
+            else if(scoreFinal[1] == KING)
+                scoreFinal[1] = 'K';
+            else if(scoreFinal[1] == QUEEN)
+                scoreFinal[1] = 'Q';
+            else if(scoreFinal[1] == JACK)
+                scoreFinal[1] = 'J';
+        }
+    }
+    if(scoreFinal[0] == STRAIGHT_FLUSH){
+        if(scoreFinal[1] == 'A')
+            return 'Royal Flush';
+        return 'Stright Flush with high card ' + scoreFinal[1];
+    }
+    if(scoreFinal[0] == FOUR_OAK)
+        return 'Four of a kind with ' + scoreFinal[1];
+    if(scoreFinal[0] == FULL_HOUSE)
+        return 'Full house with ' + scoreFinal[1][0] + ' and ' + scoreFinal[1][1];
+    if(scoreFinal[0] == FLUSH)
+        return 'Flush with ' + scoreFinal[1][0] + ' ' + scoreFinal[1][1] + ' ' + scoreFinal[1][2] + ' ' + scoreFinal[1][3] + ' ' + scoreFinal[1][4];
+    if(scoreFinal[0] == STRAIGHT)
+        return 'Stright with high card ' + scoreFinal[1];
+    if(scoreFinal[0] == THREE_OAK)
+        return 'Three of a kind with ' + scoreFinal[1];
+    if(scoreFinal[0] == TWO_PAIR)
+        return 'Two pair with ' + scoreFinal[1][0] + ' and ' + scoreFinal[1][1];
+    if(scoreFinal[0] == PAIR)
+        return 'Pair with ' + scoreFinal[1];
+    return 'High card';
 }
 
 function handScoreCalc (playerHand) {

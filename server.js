@@ -88,8 +88,8 @@ io.on('connect', (socket) => {
             }
 
             if(roundCount == 2) io.sockets.emit("gameEnded");
-            else next_turn();
-            if(raiseTurnCount <= 0) io.sockets.emit("gameEnded"); //special case
+                else next_turn();
+            //if(raiseTurnCount <= 0) io.sockets.emit("gameEnded"); //special case
         });
     
         socket.on('disconnect', () => {disconnect(socket);});
@@ -103,10 +103,13 @@ function next_turn(){
         raiseTurnCount--;
         player_turn = (player_turn+1) % players.length;
     }
-    playerSockets[player_turn].emit('requestAction');
-    console.log("turn count = " , turn_count);
-    console.log("player turn = " , player_turn);
-    turn_count++;
+    if(raiseTurnCount <= 0) io.sockets.emit("gameEnded");
+    else {
+        playerSockets[player_turn].emit('requestAction');
+        console.log("turn count = " , turn_count);
+        console.log("player turn = " , player_turn);
+        turn_count++;
+    }
     //triggerTimeout();
 }
 

@@ -9,6 +9,7 @@ const text_playerWallet     = document.getElementById("id_text_playerWallet");
 const text_playerLastAction = document.getElementById("id_text_playerLastAction");
 const input_raiseValue      = document.getElementById("id_input_raiseValue");
 const dialog_gameRules      = document.getElementById("id_dialog_gameRules");
+const text_score            = document.getElementById("id_text_score");
 let highestBet = 0;
 
 joinGame();
@@ -40,6 +41,7 @@ function startGame() {
 
 function cardRecieveAndDisplay(data) {
     playerData.hand = data[1];
+    console.log(data[0].concat(data[1]));
     updateCardHist(data[0].concat(data[1]));
     printCardArray(data[0],"id_zone_table_print",100);
     printCardArray(data[1],"id_zone_hand_print",100);
@@ -47,13 +49,26 @@ function cardRecieveAndDisplay(data) {
 
 function addTableCard(data) {
     printCard(data,"id_zone_table_print",100);
+    console.log(data);
+    updateCardHist([data]);
 }
 
 function updateCardHist(data) {
-    for(let i = 0; i < data.lenght; i++) {
+    for(let i = 0; i < data.length; i++) {
         playerData.cardValueHist[data[i].cardValue]++;
         playerData.cardSymbolHist[data[i].cardSymbol]++;
     }
+    console.log(playerData.cardSymbolHist, playerData.cardValueHist);
+}
+
+function scoreCheck() {
+    let scoreValue, scoreSymbol;
+    scoreSymbol = cardSymbolHistDetect(playerData.cardSymbolHist, playerData.hand);
+    scoreValue = cardValueHistDetect(playerData.cardValueHist);
+    console.log('score from value ', scoreValue, ' score from symbol ', scoreSymbol);
+    if(scoreValue[0] > scoreSymbol[0])
+        return scoreValue;
+    return scoreSymbol;
 }
 
 function setBlindBet(data) {
@@ -84,6 +99,7 @@ function updateLastPlayerStatus(data) {
 function gameEnded() {
     text_turnStatus.innerHTML = "The game is ended.";
     zone_action.style.visibility = "hidden";
+    text_score.innerHTML = scoreToText(scoreCheck());
 }
 
 function fold() {
