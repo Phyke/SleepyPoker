@@ -193,6 +193,7 @@ function disconnect(socket) {
         player_turn = 0;
         turn_count = 0;
         roundCount = 0;
+        highestBet = 20;
         raiseTurnCount = null;
         gameStarted = false;
     }

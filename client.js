@@ -10,7 +10,7 @@ const text_playerLastAction = document.getElementById("id_text_playerLastAction"
 const input_raiseValue      = document.getElementById("id_input_raiseValue");
 const dialog_gameRules      = document.getElementById("id_dialog_gameRules");
 const text_score            = document.getElementById("id_text_score");
-let highestBet = 0;
+let highestBet = 20;
 
 joinGame();
 socket.on("cantJoin", () => {document.write("The game has already started.");});
@@ -137,6 +137,7 @@ function call() {
 }
 
 function raise() {
+    input_raiseValue.value = '';
     if(input_raiseValue.value <= highestBet) {
         alert("You must raise more than current highest bet");
     } 
