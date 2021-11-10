@@ -1,5 +1,5 @@
 * {
-    font-size: xx-large;
+    font-size: 2vw;
     box-sizing: border-box;
 }
 
@@ -44,15 +44,16 @@ html,body {
 }
 
 #id_text_turnStatus {
-    height: 10%;
-    font-size: 75px;
+    height: 3vw;
+    font-size: 2vw;
     text-align: center;
+    padding: 0.5vw;
     background-color: burlywood;
 }
 
 #id_zone_table {
     height: 30%;
-    padding-top: 10px;
+    padding-top: 1vw;
     text-align: center;
 }
 
@@ -62,10 +63,10 @@ html,body {
 }
 
 #id_zone_table_print {
-    width: 65%;
+    width: 100%;
     height: 80%;
     display: inline-block;
-    border-style: solid;
+    background-color:darkgreen;
 }
 
 #id_zone_hand {
@@ -79,10 +80,10 @@ html,body {
 }
 
 #id_zone_hand_print {
-    width: 30%;
+    width: 50%;
     height: 80%;
     display: inline-block;
-    border-style: solid;
+    background-color:darkgreen;
 }
 
 #id_zone_action {
@@ -100,7 +101,7 @@ html,body {
     width: 50%;
     height: 80%;
     display: inline-block;
-    border-style: solid;
+    background-color:coral;
     text-align: center;
 }
 
