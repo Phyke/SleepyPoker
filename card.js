@@ -119,7 +119,7 @@ function symbolPatternDetect (hand) {
 function buildDeck() {
     const cardType = ["C","D","H","S"];
     const cardValue =  ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
-
+    deck = [];
     try
     {
         for(let i = 0; i < 4; i++) {
@@ -150,24 +150,24 @@ function buildDeck() {
         deck.push(card);
         return true;
     }
-}*//*
+}*/
 
 //this function input a card(object) and the array it will be drawn from (usually a physical deck).
 //this function won't allow to draw a card which is not exist in the array.
 //this function return false if can't draw, and return card(object) if success.
-function drawCard(card, targetArray) {
-    let foundCard = targetArray.filter(e => e.cardName == card.cardName).length;
+function pickCard(card) {
+    let foundCard = deck.filter(e => e.cardValue == card.cardValue && e.cardSymbol == card.cardSymbol).length;
     if(!foundCard) {
-        console.log("Card " + card.cardName + " is not exist in targetArray");
+        console.log("Card " + card.cardName + " is not exist in deck");
         return false;
     }
     else {
-        let index = targetArray.findIndex(e => e.cardName == card.cardName);
-        drawedCard = targetArray.splice(index,1);
-        console.log("Card " + drawedCard[0].cardName + " is drawn from targetArray");
+        let index = deck.findIndex(e => e.cardValue == card.cardValue && e.cardSymbol == card.cardSymbol);
+        let drawedCard = deck.splice(index,1);
+        console.log("Card " + drawedCard[0].cardName + " is drawn from deck");
         return drawedCard[0];
     }
-}*/
+}
 
 //this function input how many cards to draw and the array it will be drawn from (usually a physical deck).
 //this function will not draw furthur if the array is empty.
@@ -178,12 +178,13 @@ function drawCard(drawCount) {
     for(let i = 0; i < drawCount && deck.length > 0; i++) {
 
         let randomIndex = Math.floor(Math.random() * deck.length);
-        let drawedCard = deck.splice(randomIndex,1);
+        let drawedCard = deck.splice(randomIndex, 1);
         
         console.log("Card " + drawedCard[0].cardSymbol + " " + drawedCard[0].cardValue + " is drawn from targetArray");
         drawedCardList.push(drawedCard[0]);
     }
 
+    console.log(deck.length, ' cards left in deck');
     if(drawedCardList.length == drawCount) return drawedCardList;
 
     else
@@ -236,7 +237,7 @@ function scoreToText(scoreFinal) {
     if(scoreFinal[0] == STRAIGHT_FLUSH){
         if(scoreFinal[1] == 'A')
             return 'Royal Flush';
-        return 'Stright Flush with high card ' + scoreFinal[1];
+        return 'Straight Flush with high card ' + scoreFinal[1];
     }
     if(scoreFinal[0] == FOUR_OAK)
         return 'Four of a kind with ' + scoreFinal[1];
@@ -245,7 +246,7 @@ function scoreToText(scoreFinal) {
     if(scoreFinal[0] == FLUSH)
         return 'Flush with ' + scoreFinal[1][0] + ' ' + scoreFinal[1][1] + ' ' + scoreFinal[1][2] + ' ' + scoreFinal[1][3] + ' ' + scoreFinal[1][4];
     if(scoreFinal[0] == STRAIGHT)
-        return 'Stright with high card ' + scoreFinal[1];
+        return 'Straight with high card ' + scoreFinal[1];
     if(scoreFinal[0] == THREE_OAK)
         return 'Three of a kind with ' + scoreFinal[1];
     if(scoreFinal[0] == TWO_PAIR)
@@ -266,6 +267,8 @@ function handScoreCalc (playerHand) {
 //printCardArray(drawRandomCard(5,deck),"hand",100);
 
 module.exports = {
+    card,
     buildDeck,
     drawCard,
+    pickCard
 };

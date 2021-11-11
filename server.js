@@ -156,7 +156,15 @@ function setBlindBetS() {
 
 function sendCardtoPlayers() {
     dealer.buildDeck();
+    tableCards = [];
     tableCards = dealer.drawCard(5);
+    /*
+    tableCards.push(dealer.pickCard(new dealer.card(1, 2, "c_img/C1.png")));
+    tableCards.push(dealer.pickCard(new dealer.card(1, 3, "c_img/C3.png")));
+    tableCards.push(dealer.pickCard(new dealer.card(1, 4, "c_img/C4.png")));
+    tableCards.push(dealer.pickCard(new dealer.card(1, 5, "c_img/C5.png")));
+    tableCards.push(dealer.pickCard(new dealer.card(1, 6, "c_img/C6.png")));
+    */
     playerSockets.forEach(socket => {
         handCards = dealer.drawCard(2);
 
