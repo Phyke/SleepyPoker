@@ -9,17 +9,43 @@
 </head>
 <body>
     <div id="id_text_turnStatus">Welcome</div>
+    <dialog id="id_dialog_inputUsername" style="visibility: visible;margin-top: 5%;padding-top: 0;">
+        <p>Please enter your username</p>
+        <input type="text" id="id_input_username">
+        <button id="id_button_submitUsername" onclick="submitUsername()">Submit</button>
+    </dialog>
     <div class="row">
         <div class="column left" id="id_zone_playerInfo">
             <p>SleepyPoker</p>
-            <p>Your name: <span id="id_text_playerName"></span></p>
+            <table>
+                <tr>
+                    <th colspan="2">Your Information</th>
+                </tr>
+                <tr>
+                    <td>Username</td>
+                    <td id="id_text_playerName">None</td>
+                </tr>
+                <tr>
+                    <td>Player number</td>
+                    <td id="id_text_playerNo">None</td>
+                </tr>
+                <tr>
+                    <td>Wallet</td>
+                    <td id="id_text_playerWallet">None</td>
+                </tr>
+                <tr>
+                    <td>Last action</td>
+                    <td id="id_text_playerLastAction">None</td>
+                </tr>
+            </table><br>
+            <!--<p>Your name: <span id="id_text_playerName"></span></p>
             <p>Your no: <span id="id_text_playerNo"></span></p>
             <p>Your wallet: <span id="id_text_playerWallet"></span></p>
-            <p>Your last action: <span id="id_text_playerLastAction"></span></p>
+            <p>Your last action: <span id="id_text_playerLastAction"></span></p>-->
             <button onclick="showGameRules()">Game Rules</button>
-            <dialog id="id_dialog_gameRules" style="margin-top:1%;margin-left: 3%;">
-                <span>Game Rules</span><br>
-                <ol>
+            <dialog id="id_dialog_gameRules" style="margin-top:1%;margin-left: 3%;padding-top: 3px;padding-bottom: 3px;">
+                <!--<p style="margin-top: 0;margin-bottom: 0;">Game Rules</p>-->
+                <ol style="margin-top: 0;margin-bottom: 0;">
                     <li>First player is the host who can start the game.</li>
                     <li>Minimum bet is 20$.</li>
                     <li>Rule 3 lorem ipsum.</li>
@@ -51,8 +77,19 @@
         </div>
         <div class="column right" id="id_zone_otherPlayer">
             <button onclick="startGame()" id="id_button_startGame" style="visibility: hidden;">Start Game</button>
-            <p>All player status:</p>
-            <ul id="id_list_status"></ul>
+            <table id="id_list_status">
+                <tr>
+                    <th colspan="4">All players' status</th>
+                </tr>
+                <tr>
+                    <th>No.</th>
+                    <th>Username</th>
+                    <th>Last Bet</th>
+                    <th>Last Action</th>
+                </tr>
+            </table>
+            <!--<p>All player status:</p>
+            <ul id="id_list_status"></ul>-->
             <p id="id_text_player_score"></p>
             <p id="id_text_winner_score"></p>
         </div>

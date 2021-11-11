@@ -11,9 +11,13 @@ const input_raiseValue      = document.getElementById("id_input_raiseValue");
 const dialog_gameRules      = document.getElementById("id_dialog_gameRules");
 const text_player_score     = document.getElementById("id_text_player_score");
 const text_winner_score     = document.getElementById("id_text_winner_score");
+const dialog_inputUsername  = document.getElementById("id_dialog_inputUsername");
+const input_username        = document.getElementById("id_input_username");
+const button_submitUsername = document.getElementById("id_button_submitUsername");
 let highestBet = 20;
 
-joinGame();
+//joinGame();
+dialog_inputUsername.show();
 socket.on("cantJoin", () => {document.write("The game has already started.");});
 socket.on("takeSeat", (playerData) => {onTakeSeat(playerData);});
 socket.on("gameStarted", (cardsData) => {cardRecieveAndDisplay(cardsData);});
@@ -24,6 +28,16 @@ socket.on("updateLastPlayerStatus", (lastPlayerData_highestBet) => {updateLastPl
 socket.on("addTableCard", (nextTableCard) => {addTableCard(nextTableCard);});
 socket.on("gameEnded", () => {gameEnded();});
 socket.on('returnWinner', ([winnerNumber, winnerScore]) => {showWinner(winnerNumber, winnerScore);});
+
+function submitUsername() {
+    if(input_username.value == "") {
+        alert("Your username can't be empty.");
+    }
+    else {
+        dialog_inputUsername.style.visibility = "hidden";
+        socket.emit("joinGame",input_username.value);
+    }
+}
 
 function joinGame() {
     const name = prompt("Please enter your name.");
@@ -89,18 +103,31 @@ function setupStartGame(data) {
     playerDataList = data[0];
     highestBet = data[1];
     playerDataList.forEach(playerData => {
-        let new_listItem = document.createElement("li");
-        new_listItem.innerHTML = "Player " + playerData.number + " : " + playerData.lastAction + " , " + playerData.lastBet;
-        list_status.appendChild(new_listItem);
+        let new_tableRow = document.createElement("tr");
+        let new_tableData1 = document.createElement("td");
+        let new_tableData2 = document.createElement("td");
+        let new_tableData3 = document.createElement("td");
+        let new_tableData4 = document.createElement("td");
+        new_tableData1.innerHTML = playerData.number;
+        new_tableData2.innerHTML = playerData.name;
+        new_tableData3.innerHTML = playerData.lastBet;
+        new_tableData4.innerHTML = playerData.lastAction;
+        new_tableRow.appendChild(new_tableData1);
+        new_tableRow.appendChild(new_tableData2);
+        new_tableRow.appendChild(new_tableData3);
+        new_tableRow.appendChild(new_tableData4);
+        list_status.appendChild(new_tableRow);
+        //new_listItem.innerHTML = "Player " + playerData.number + " : " + playerData.lastAction + " , " + playerData.lastBet;
+        //list_status.appendChild(new_listItem);
     });
     text_turnStatus.innerHTML = "Waiting for other players";
 }
 
 function updateLastPlayerStatus(data) {
     highestBet = data[1];
-    listItems = list_status.querySelectorAll('li');
-    listItems[data[0][0]].innerHTML = 'Player ' + data[0][0] + ' : ' + data[0][1] + ' , ' + data[0][2];
-    text_turnStatus.innerHTML = 'Waiting for other players';
+    listItems = list_status.querySelectorAll("tr");
+    listItems[data[0][0]+2].innerHTML = "Player " + data[0][0] + " : " + data[0][1] + " , " + data[0][2];
+    text_turnStatus.innerHTML = "Waiting for other players";
 }
 
 function gameEnded() {
@@ -123,7 +150,8 @@ function showWinner(winnerNumber, winnerScore) {
 function fold() {
     playerData.lastAction = "Fold";
     playerData.folded = true;
-    socket.emit('passTurn', playerData);
+    socket.emit("passTurn", playerData);
+    text_playerLastAction.innerHTML = "Fold";
     zone_action.style.visibility = "hidden";
 }
 
@@ -134,6 +162,7 @@ function check() {
     else {
         playerData.lastAction = "Check";
         socket.emit("passTurn", playerData);
+        text_playerLastAction.innerHTML = "Check";
         zone_action.style.visibility = "hidden";
     }
 }
@@ -149,12 +178,13 @@ function call() {
         playerData.lastAction = "Call";
         playerData.lastBet = highestBet;
         socket.emit("passTurn", playerData);
+        text_playerLastAction.innerHTML = "Call";
         zone_action.style.visibility = "hidden";
     }
 }
 
 function raise() {
-    input_raiseValue.value = '';
+    console.log("Comparing input_raiseValue.value = " + input_raiseValue.value + "vs highestBet = " + highestBet);
     if(input_raiseValue.value <= highestBet) {
         alert("You must raise more than current highest bet");
     } 
@@ -165,8 +195,10 @@ function raise() {
         playerData.lastAction = "Raise";
         playerData.lastBet = input_raiseValue.value;
         socket.emit("passTurn", playerData);
+        text_playerLastAction.innerHTML = "Raise";
         zone_action.style.visibility = "hidden";
     }
+    input_raiseValue.value = '';
 }
 
 function allIn() {
