@@ -41,6 +41,7 @@ function startGame() {
 }
 
 function cardRecieveAndDisplay(data) {
+    tableCard = data[0];
     playerData.hand = data[1];
     console.log(data[0].concat(data[1]));
     updateCardHist(data[0].concat(data[1]));
@@ -49,6 +50,7 @@ function cardRecieveAndDisplay(data) {
 }
 
 function addTableCard(data) {
+    tableCard.push(data);
     printCard(data,"id_zone_table_print",100);
     console.log(data);
     updateCardHist([data]);
@@ -64,7 +66,7 @@ function updateCardHist(data) {
 
 function scoreCheck() {
     let scoreValue, scoreSymbol;
-    scoreSymbol = cardSymbolHistDetect(playerData.cardSymbolHist, playerData.hand);
+    scoreSymbol = cardSymbolHistDetect(playerData.cardSymbolHist, tableCard.concat(playerData.hand));
     scoreValue = cardValueHistDetect(playerData.cardValueHist);
     console.log('score from value ', scoreValue, ' score from symbol ', scoreSymbol);
     if(scoreValue[0] > scoreSymbol[0])
