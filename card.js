@@ -40,23 +40,23 @@ function cardValueHistDetect (cardValueHist) {
     let max = Math.max(...cardValueHist);
     console.log("Maximum value in value histogram is %d\n", max);
     if(max >= 4)
-        return [FOUR_OAK, cardValueHist.lastIndexOf(max)];
+        return [FOUR_OAK, [cardValueHist.lastIndexOf(max)]];
     if(max == 3)
     {
         let THREE_OAK_Value = cardValueHist.lastIndexOf(3);
         if(cardValueHist.includes(2))
             return [FULL_HOUSE, [THREE_OAK_Value, cardValueHist.lastIndexOf(2)]];
-        return [THREE_OAK, THREE_OAK_Value];
+        return [THREE_OAK, [THREE_OAK_Value]];
     }
     if(max == 2)
     {
         let PAIR_Value = cardValueHist.lastIndexOf(2);
         cardValueHist.splice(PAIR_Value, 1);
         if(cardValueHist.includes(2))
-            return [TWO_PAIR, [PAIR_Value, cardValueHist.lastIndexOf(2)]];
-        return [PAIR, PAIR_Value];
+            return [TWO_PAIR, [PAIR_Value, [cardValueHist.lastIndexOf(2)]]];
+        return [PAIR, [PAIR_Value]];
     }
-    return HIGH_CARD;
+    return [HIGH_CARD, cardValueHist.lastIndexOf(1)];
 }
 
 function cardSymbolHistDetect (cardSymbolHist, cards) {
@@ -79,13 +79,13 @@ function cardSymbolHistDetect (cardSymbolHist, cards) {
             //console.log('seq ', seq);
             if(seq == 3 && cards[i].cardValue == 3 && cards[cards.length - 1].cardValue == 14) { // A 2 3 4 5
                 if(max >= 5)
-                    return [STRAIGHT_FLUSH, 5];
-                return [STRAIGHT, 5];
+                    return [STRAIGHT_FLUSH, [5]];
+                return [STRAIGHT, [5]];
             }
             if(seq == 4) {
                 if(max >= 5)
-                    return [STRAIGHT_FLUSH, cards[i + 3].cardValue];
-                return [STRAIGHT, cards[i + 3].cardValue];
+                    return [STRAIGHT_FLUSH, [cards[i + 3].cardValue]];
+                return [STRAIGHT, [cards[i + 3].cardValue]];
             }
         }
         else
@@ -98,18 +98,36 @@ function cardSymbolHistDetect (cardSymbolHist, cards) {
             cardsValueFlush[i] = cardsValueFlush[i].cardValue;
         return [FLUSH, cardsValueFlush];
     }
-    return HIGH_CARD;
+    return [HIGH_CARD];
 }
 
-function symbolPatternDetect (hand) {
-    let flush = true, straight = true;
-    
-    /*for(let i = 1; i < 5; i++) {
-        if(hand[i].cardSymbol != hand[0].cardSymbol)
-            flush = false;
-        if(hand[i].cardValue - hand[i - 1].cardValue != 1)
-            straight = false;
-    }*/
+function scoreComparison(allPlayerScore) {
+    let winnerNumber = [allPlayerScore[0][0].number], winnerScore = allPlayerScore[0][1];
+
+    for(let i = 1; i < allPlayerScore.length; i++) {
+        console.log('current winning player: ', winnerNumber);
+        console.log('current winning score: ', winnerScore);
+        let currentPlayerScore = allPlayerScore[i][1];
+
+        if(winnerScore[0] < currentPlayerScore[0])
+            winnerScore = [];
+        
+        else if(winnerScore[0] == currentPlayerScore[0]) {
+            for(let j = 0; j < currentPlayerScore[1].length; j++) {
+                if(winnerScore[1][j] < currentPlayerScore[1][j])
+                winnerNumber = [];
+            }
+            if(winnerNumber != []) {
+                winnerNumber.push(allPlayerScore[i][0].number);
+            }
+        }
+
+        if(winnerNumber == []) {
+            winnerNumber = [allPlayerScore[i][0].number];
+            winnerScore = currentPlayerScore;
+        }
+    }
+    return [winnerNumber, winnerScore];
 }
 
 
@@ -209,56 +227,39 @@ function printCardArray (cardArray, targetHtmlElementID, width) {
         printCard(cardArray[i], targetHtmlElementID, width)
 }
 
-function scoreToText(scoreFinal) {
-    if(scoreFinal.length > 1) {
-        if(scoreFinal[1].length > 1) {
-            for(let i = 0; i < scoreFinal[1].length; i++) {
-                if(scoreFinal[1][i] == ACE)
-                    scoreFinal[1][i] = 'A';
-                else if(scoreFinal[1][i] == KING)
-                    scoreFinal[1][i] = 'K';
-                else if(scoreFinal[1][i] == QUEEN)
-                    scoreFinal[1][i] = 'Q';
-                else if(scoreFinal[1][i] == JACK)
-                    scoreFinal[1][i]= 'J';
-            }
-        }
-        else {
-            if(scoreFinal[1] == ACE)
-                scoreFinal[1] = 'A';
-            else if(scoreFinal[1] == KING)
-                scoreFinal[1] = 'K';
-            else if(scoreFinal[1] == QUEEN)
-                scoreFinal[1] = 'Q';
-            else if(scoreFinal[1] == JACK)
-                scoreFinal[1] = 'J';
+function scoreToText(score) {
+    if(score.length > 1) {
+        for(let i = 0; i < score[1].length; i++) {
+            if(score[1][i] == ACE)
+                score[1][i] = 'A';
+            else if(score[1][i] == KING)
+                score[1][i] = 'K';
+            else if(score[1][i] == QUEEN)
+                score[1][i] = 'Q';
+            else if(score[1][i] == JACK)
+                score[1][i]= 'J';
         }
     }
-    if(scoreFinal[0] == STRAIGHT_FLUSH){
-        if(scoreFinal[1] == 'A')
+    if(score[0] == STRAIGHT_FLUSH){
+        if(score[1] == 'A')
             return 'Royal Flush';
-        return 'Straight Flush with high card ' + scoreFinal[1];
+        return 'Straight Flush with high card ' + score[1][0];
     }
-    if(scoreFinal[0] == FOUR_OAK)
-        return 'Four of a kind with ' + scoreFinal[1];
-    if(scoreFinal[0] == FULL_HOUSE)
-        return 'Full house with ' + scoreFinal[1][0] + ' and ' + scoreFinal[1][1];
-    if(scoreFinal[0] == FLUSH)
-        return 'Flush with ' + scoreFinal[1][0] + ' ' + scoreFinal[1][1] + ' ' + scoreFinal[1][2] + ' ' + scoreFinal[1][3] + ' ' + scoreFinal[1][4];
-    if(scoreFinal[0] == STRAIGHT)
-        return 'Straight with high card ' + scoreFinal[1];
-    if(scoreFinal[0] == THREE_OAK)
-        return 'Three of a kind with ' + scoreFinal[1];
-    if(scoreFinal[0] == TWO_PAIR)
-        return 'Two pair with ' + scoreFinal[1][0] + ' and ' + scoreFinal[1][1];
-    if(scoreFinal[0] == PAIR)
-        return 'Pair with ' + scoreFinal[1];
+    if(score[0] == FOUR_OAK)
+        return 'Four of a kind with ' + score[1][0];
+    if(score[0] == FULL_HOUSE)
+        return 'Full house with ' + score[1][0] + ' and ' + score[1][1];
+    if(score[0] == FLUSH)
+        return 'Flush with ' + score[1][0] + ' ' + score[1][1] + ' ' + score[1][2] + ' ' + score[1][3] + ' ' + score[1][4];
+    if(score[0] == STRAIGHT)
+        return 'Straight with high card ' + score[1][0];
+    if(score[0] == THREE_OAK)
+        return 'Three of a kind with ' + score[1][0];
+    if(score[0] == TWO_PAIR)
+        return 'Two pair with ' + score[1][0] + ' and ' + score[1][1];
+    if(score[0] == PAIR)
+        return 'Pair with ' + score[1][0];
     return 'High card';
-}
-
-function handScoreCalc (playerHand) {
-    playerHand.sort(cardSortProperty);
-
 }
 
 //printCard(deck[0],"table",100);
@@ -270,5 +271,6 @@ module.exports = {
     card,
     buildDeck,
     drawCard,
-    pickCard
+    pickCard,
+    scoreComparison
 };

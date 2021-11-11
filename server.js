@@ -38,6 +38,7 @@ let highestBet = 20;
 let minimumBet = 20;
 let raiseTurnCount;
 let roundCount = 0;
+let allPlayerScore = [];
 //let timeOut;
 //const MAX_WAITING = 5000;
 
@@ -75,21 +76,41 @@ io.on('connect', (socket) => {
     
         socket.on('passTurn',(playerData) => {
             //resetTimeOut();
-            updatePlayerData(socket,playerData);
-            if(playerData.lastAction == "Raise") raiseTurnCount = players.length - 1;
+            updatePlayerData(socket, playerData);
+
+            if(playerData.lastAction == "Raise")
+                raiseTurnCount = players.length - 1;
             else raiseTurnCount--;
+
             console.log("raiseTurnCount = ", raiseTurnCount);
+
             if(raiseTurnCount <= 0) {
-                raiseTurnCount = players.length;
-                console.log("reseting raisecount now raiseTurnCount = " , raiseTurnCount);
                 roundCount++;
-                console.log("roundCount = ", roundCount);
-                io.sockets.emit("addTableCard",tableCards[roundCount+2]);
+                if(roundCount == 3) io.sockets.emit("gameEnded");
+                else{
+                    raiseTurnCount = players.length;
+                    console.log("reseting raisecount now raiseTurnCount = " , raiseTurnCount);
+                    console.log("roundCount = ", roundCount);
+                    io.sockets.emit("addTableCard",tableCards[roundCount+2]);
+                }
             }
 
-            if(roundCount == 2) io.sockets.emit("gameEnded");
-                else next_turn();
+            if(roundCount < 3)
+                next_turn();
             //if(raiseTurnCount <= 0) io.sockets.emit("gameEnded"); //special case
+        });
+
+        socket.on('requestWinner', (data) => {
+            allPlayerScore.push(data);
+            console.log('data recieve', data[0].number, data[1]);
+            if(allPlayerScore.length == players.length) {
+                console.log('allPlayerscore', allPlayerScore);
+                let winnerData = dealer.scoreComparison(allPlayerScore);
+                console.log('winnerData', winnerData);
+                playerSockets.forEach(socket => {
+                    socket.emit('returnWinner', winnerData);
+                });
+            }
         });
     
         socket.on('disconnect', () => {disconnect(socket);});
@@ -103,10 +124,9 @@ function next_turn(){
         raiseTurnCount--;
         player_turn = (player_turn+1) % players.length;
     }
-    if(raiseTurnCount <= 0) {
-        io.sockets.emit("addTableCard",tableCards[roundCount+3]);
-        io.sockets.emit("gameEnded");
-    }
+
+    if(raiseTurnCount <= 0) io.sockets.emit("gameEnded");
+    
     else {
         playerSockets[player_turn].emit('requestAction');
         console.log("turn count = " , turn_count);

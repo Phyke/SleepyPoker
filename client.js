@@ -9,7 +9,8 @@ const text_playerWallet     = document.getElementById("id_text_playerWallet");
 const text_playerLastAction = document.getElementById("id_text_playerLastAction");
 const input_raiseValue      = document.getElementById("id_input_raiseValue");
 const dialog_gameRules      = document.getElementById("id_dialog_gameRules");
-const text_score            = document.getElementById("id_text_score");
+const text_player_score     = document.getElementById("id_text_player_score");
+const text_winner_score     = document.getElementById("id_text_winner_score");
 let highestBet = 20;
 
 joinGame();
@@ -22,11 +23,13 @@ socket.on("setupStartGame", (startGameData) => {setupStartGame(startGameData);})
 socket.on("updateLastPlayerStatus", (lastPlayerData_highestBet) => {updateLastPlayerStatus(lastPlayerData_highestBet);});
 socket.on("addTableCard", (nextTableCard) => {addTableCard(nextTableCard);});
 socket.on("gameEnded", () => {gameEnded();});
+socket.on('returnWinner', ([winnerNumber, winnerScore]) => {showWinner(winnerNumber, winnerScore);});
 
 function joinGame() {
     const name = prompt("Please enter your name.");
     socket.emit("joinGame",name);
 }
+
 function onTakeSeat(data) {
     playerData = data;
     console.log(data.cardValueHist);
@@ -35,6 +38,7 @@ function onTakeSeat(data) {
     text_playerWallet.innerHTML = playerData.wallet;
     if(playerData.number == 0) button_startGame.style.visibility = "visible";
 }
+
 function startGame() {
     socket.emit("startGame");
     button_startGame.style.visibility = "hidden";
@@ -69,7 +73,7 @@ function scoreCheck() {
     scoreSymbol = cardSymbolHistDetect(playerData.cardSymbolHist, tableCard.concat(playerData.hand));
     scoreValue = cardValueHistDetect(playerData.cardValueHist);
     console.log('score from value ', scoreValue, ' score from symbol ', scoreSymbol);
-    if(scoreValue[0] > scoreSymbol[0])
+    if(scoreValue[0] >= scoreSymbol[0])
         return scoreValue;
     return scoreSymbol;
 }
@@ -94,21 +98,32 @@ function setupStartGame(data) {
 
 function updateLastPlayerStatus(data) {
     highestBet = data[1];
-    listItems = list_status.querySelectorAll("li");
-    listItems[data[0][0]].innerHTML = "Player " + data[0][0] + " : " + data[0][1] + " , " + data[0][2];
-    text_turnStatus.innerHTML = "Waiting for other players";
+    listItems = list_status.querySelectorAll('li');
+    listItems[data[0][0]].innerHTML = 'Player ' + data[0][0] + ' : ' + data[0][1] + ' , ' + data[0][2];
+    text_turnStatus.innerHTML = 'Waiting for other players';
 }
 
 function gameEnded() {
-    text_turnStatus.innerHTML = "The game is ended.";
-    zone_action.style.visibility = "hidden";
-    text_score.innerHTML = scoreToText(scoreCheck());
+    text_turnStatus.innerHTML = 'The game is ended.';
+    zone_action.style.visibility = 'hidden';
+    let playerScore = scoreCheck();
+    text_player_score.innerHTML = 'Your highest score is:<br>' + scoreToText(playerScore);
+    socket.emit('requestWinner', [playerData, playerScore]);
+}
+
+function showWinner(winnerNumber, winnerScore) {
+    let winnerNumberText = '';
+    console.log(winnerNumber);
+    for(let i = 0; i < winnerNumber.length; i++)
+        winnerNumberText = winnerNumberText + winnerNumber[i] + ' ';
+    console.log(winnerNumberText);
+    text_winner_score.innerHTML = 'The winner is Player:<br>' + winnerNumberText + '<br><br>Winner score:<br>' + scoreToText(winnerScore);
 }
 
 function fold() {
     playerData.lastAction = "Fold";
     playerData.folded = true;
-    socket.emit("passTurn", playerData);
+    socket.emit('passTurn', playerData);
     zone_action.style.visibility = "hidden";
 }
 
