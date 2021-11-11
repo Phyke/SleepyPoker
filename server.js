@@ -69,6 +69,7 @@ io.on('connect', (socket) => {
         socket.on('startGame',() => {
             gameStarted = true;
             raiseTurnCount = players.length;
+            allPlayerScore = [];
             setBlindBetS();
             sendCardtoPlayers();
             next_turn();
@@ -102,7 +103,7 @@ io.on('connect', (socket) => {
 
         socket.on('requestWinner', (data) => {
             allPlayerScore.push(data);
-            console.log('data recieve', data[0].number, data[1]);
+            console.log('data recieve', data[0], data[1]);
             if(allPlayerScore.length == players.length) {
                 console.log('allPlayerscore', allPlayerScore);
                 let winnerData = dealer.scoreComparison(allPlayerScore);

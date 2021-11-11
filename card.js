@@ -16,7 +16,7 @@ const STRAIGHT = 4;
 const THREE_OAK = 3;
 const TWO_PAIR = 2;
 const PAIR = 1;
-const HIGH_CARD = [0];
+const HIGH_CARD = 0;
 
 let deck = [];
 let cardValueHistogram = [];
@@ -56,7 +56,7 @@ function cardValueHistDetect (cardValueHist) {
             return [TWO_PAIR, [PAIR_Value, [cardValueHist.lastIndexOf(2)]]];
         return [PAIR, [PAIR_Value]];
     }
-    return [HIGH_CARD, cardValueHist.lastIndexOf(1)];
+    return [HIGH_CARD, [cardValueHist.lastIndexOf(1)]];
 }
 
 function cardSymbolHistDetect (cardSymbolHist, cards) {
@@ -84,25 +84,25 @@ function cardSymbolHistDetect (cardSymbolHist, cards) {
             }
             if(seq == 4) {
                 if(max >= 5)
-                    return [STRAIGHT_FLUSH, [cards[i + 3].cardValue]];
-                return [STRAIGHT, [cards[i + 3].cardValue]];
+                    return [STRAIGHT_FLUSH, [cards[i].cardValue + 3]];
+                return [STRAIGHT, [cards[i].cardValue + 3]];
             }
         }
         else
             seq = 0;
     }
     if(max >= 5) {
-        let cardsValueFlush = cards.slice(cards.length - 5, cards.length);
-        cardsValueFlush.reverse();
+        cards.reverse();
         for(let i = 0; i < 5; i++)
-            cardsValueFlush[i] = cardsValueFlush[i].cardValue;
-        return [FLUSH, cardsValueFlush];
+            cards[i] = cards[i].cardValue;
+        return [FLUSH, cards];
     }
     return [HIGH_CARD];
 }
 
 function scoreComparison(allPlayerScore) {
-    let winnerNumber = [allPlayerScore[0][0].number], winnerScore = allPlayerScore[0][1];
+    let winnerNumber = [], winnerScore = allPlayerScore[0][1];
+    winnerNumber.push(allPlayerScore[0][0]);
 
     for(let i = 1; i < allPlayerScore.length; i++) {
         console.log('current winning player: ', winnerNumber);
@@ -110,20 +110,20 @@ function scoreComparison(allPlayerScore) {
         let currentPlayerScore = allPlayerScore[i][1];
 
         if(winnerScore[0] < currentPlayerScore[0])
-            winnerScore = [];
+            winnerNumber = [];
         
         else if(winnerScore[0] == currentPlayerScore[0]) {
             for(let j = 0; j < currentPlayerScore[1].length; j++) {
                 if(winnerScore[1][j] < currentPlayerScore[1][j])
-                winnerNumber = [];
+                    winnerNumber = [];
             }
-            if(winnerNumber != []) {
-                winnerNumber.push(allPlayerScore[i][0].number);
+            if(winnerNumber.length) {
+                winnerNumber.push(allPlayerScore[i][0]);
             }
         }
 
-        if(winnerNumber == []) {
-            winnerNumber = [allPlayerScore[i][0].number];
+        if(!winnerNumber.length) {
+            winnerNumber.push(allPlayerScore[i][0]);
             winnerScore = currentPlayerScore;
         }
     }
@@ -228,20 +228,20 @@ function printCardArray (cardArray, targetHtmlElementID, width) {
 }
 
 function scoreToText(score) {
-    if(score.length > 1) {
-        for(let i = 0; i < score[1].length; i++) {
-            if(score[1][i] == ACE)
-                score[1][i] = 'A';
-            else if(score[1][i] == KING)
-                score[1][i] = 'K';
-            else if(score[1][i] == QUEEN)
-                score[1][i] = 'Q';
-            else if(score[1][i] == JACK)
-                score[1][i]= 'J';
-        }
+    console.log(score[1]);
+    for(let i = 0; i < score[1].length; i++) {
+        if(score[1][i] == ACE)
+            score[1][i] = 'A';
+        else if(score[1][i] == KING)
+            score[1][i] = 'K';
+        else if(score[1][i] == QUEEN)
+            score[1][i] = 'Q';
+        else if(score[1][i] == JACK)
+            score[1][i]= 'J';
     }
+
     if(score[0] == STRAIGHT_FLUSH){
-        if(score[1] == 'A')
+        if(score[1][0] == 'A')
             return 'Royal Flush';
         return 'Straight Flush with high card ' + score[1][0];
     }
@@ -259,7 +259,7 @@ function scoreToText(score) {
         return 'Two pair with ' + score[1][0] + ' and ' + score[1][1];
     if(score[0] == PAIR)
         return 'Pair with ' + score[1][0];
-    return 'High card';
+    return 'High card with ' + score[1][0];
 }
 
 //printCard(deck[0],"table",100);

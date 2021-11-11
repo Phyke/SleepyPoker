@@ -27,7 +27,7 @@ socket.on("setupStartGame", (startGameData) => {setupStartGame(startGameData);})
 socket.on("updateLastPlayerStatus", (lastPlayerData_highestBet) => {updateLastPlayerStatus(lastPlayerData_highestBet);});
 socket.on("addTableCard", (nextTableCard) => {addTableCard(nextTableCard);});
 socket.on("gameEnded", () => {gameEnded();});
-socket.on('returnWinner', ([winnerNumber, winnerScore]) => {showWinner(winnerNumber, winnerScore);});
+socket.on('returnWinner', (winnerData) => {showWinner(winnerData);});
 
 function submitUsername() {
     if(input_username.value == "") {
@@ -134,16 +134,15 @@ function gameEnded() {
     text_turnStatus.innerHTML = 'The game is ended.';
     zone_action.style.visibility = 'hidden';
     let playerScore = scoreCheck();
+    socket.emit('requestWinner', [playerData.number, playerScore]);
     text_player_score.innerHTML = 'Your highest score is:<br>' + scoreToText(playerScore);
-    socket.emit('requestWinner', [playerData, playerScore]);
 }
 
-function showWinner(winnerNumber, winnerScore) {
-    let winnerNumberText = '';
-    console.log(winnerNumber);
+function showWinner(winnerData) {
+    let winnerNumber = winnerData[0], winnerScore = winnerData[1];
+    let winnerNumberText = '>';
     for(let i = 0; i < winnerNumber.length; i++)
-        winnerNumberText = winnerNumberText + winnerNumber[i] + ' ';
-    console.log(winnerNumberText);
+        winnerNumberText = winnerNumberText + ' ' + winnerNumber[i];
     text_winner_score.innerHTML = 'The winner is Player:<br>' + winnerNumberText + '<br><br>Winner score:<br>' + scoreToText(winnerScore);
 }
 
