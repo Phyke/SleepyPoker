@@ -212,19 +212,18 @@ function drawCard(drawCount) {
     }
 }
 
-function printCard (card, targetHtmlElementID, width) {
-    const element_target = document.getElementById(targetHtmlElementID);
+function printCard (card, targetHtmlElement, width) {
     const element_cardImg = document.createElement("img");
 
     element_cardImg.src = card.imgPath;
     //element_cardImg.width = width;
     element_cardImg.className = "cardimg";
-    element_target.appendChild(element_cardImg);
+    targetHtmlElement.appendChild(element_cardImg);
 }
 
-function printCardArray (cardArray, targetHtmlElementID, width) {
+function printCardArray (cardArray, targetHtmlElement, width) {
     for(let i = 0; i < cardArray.length; i++)
-        printCard(cardArray[i], targetHtmlElementID, width)
+        printCard(cardArray[i], targetHtmlElement, width)
 }
 
 function scoreToText(score) {

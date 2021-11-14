@@ -67,7 +67,8 @@ tr,th,td {
     font-size: 2vw;
     text-align: center;
     padding: 0.5vw;
-    background-color: burlywood;
+    color: white;
+    background-color: black;
     position:fixed;
 }
 
