@@ -62,22 +62,37 @@ io.on('connect', (socket) => {
     if(gameStarted) {
         console.log("The game has already started.");
         socket.emit("cantJoin");
-        socket.on('disconnect', () => {console.log('A user disconnected after cant join, due to game already started');});
+        socket.disconnect();
+        console.log("force disconnect user because join after game started");
     }
     else {
-        socket.on("joinGame",(username)=>{joinGameS(socket,username);});
+        socket.on("joinGame",(username)=>{
+            if(gameStarted){
+                socket.emit("cantJoin");
+                socket.disconnect();
+                console.log("force disconnect user because not input username");
+            }
+            else {
+                joinGameS(socket,username);
+            }
+        });
         socket.on('startGame',() => {
+            player_turn = 0;
+            turn_count = 0;
+            roundCount = 0;
+            highestBet = 20;
             gameStarted = true;
             raiseTurnCount = players.length;
             allPlayerScore = [];
             setBlindBetS();
+            io.sockets.emit("setupStartGame",minimumBet);
             sendCardtoPlayers();
             next_turn();
         });
     
         socket.on('passTurn',(playerData) => {
             //resetTimeOut();
-            updatePlayerData(socket, playerData);
+            updatePlayerData(playerData);
 
             if(playerData.lastAction == "Raise")
                 raiseTurnCount = players.length - 1;
@@ -113,6 +128,10 @@ io.on('connect', (socket) => {
                 });
             }
         });
+
+        socket.on("requestRestartGame", () => {
+            restartGameS();
+        });
     
         socket.on('disconnect', () => {disconnect(socket);});
     }
@@ -129,6 +148,7 @@ function next_turn(){
     if(raiseTurnCount <= 0) io.sockets.emit("gameEnded");
     
     else {
+        console.log("player_turn before emit = ",player_turn);
         playerSockets[player_turn].emit('requestAction');
         console.log("turn count = " , turn_count);
         console.log("player turn = " , player_turn);
@@ -150,10 +170,10 @@ function resetTimeOut(){
    }
 }*/
 
-function getAllPlayersData() {
+function getAllPublicPlayersData() {
     let allPlayersData = [];
     for(let i = 0; i < players.length; i++){
-        allPlayersData.push(players[i]);
+        allPlayersData.push([players[i].number,players[i].name,players[i].lastBet,players[i].lastAction]);
     }
     return allPlayersData;
 }
@@ -163,16 +183,16 @@ function joinGameS(socket,username) {
     let newPlayer = new PLAYER(username,players.length);
     players.push(newPlayer);
     socket.emit('takeSeat',newPlayer);
+    io.sockets.emit("newPlayerJoined",getAllPublicPlayersData());
 }
 
 function setBlindBetS() {
     player_turn = (player_turn+1) % players.length;
     players[player_turn].lastBet = minimumBet/2;
-    playerSockets[player_turn].emit("blindBet",minimumBet/2);
+    io.sockets.emit("blindBet",[player_turn,minimumBet/2]);
     player_turn = (player_turn+1) % players.length;
     players[player_turn].lastBet = minimumBet;
-    playerSockets[player_turn].emit("blindBet",minimumBet);
-    io.sockets.emit("setupStartGame",[getAllPlayersData(),minimumBet]);
+    io.sockets.emit("blindBet",[player_turn,minimumBet]);
 }
 
 function sendCardtoPlayers() {
@@ -191,27 +211,39 @@ function sendCardtoPlayers() {
 
         if(handCards != false) {
             players[playerSockets.indexOf(socket)].hand = handCards;
-            socket.emit("gameStarted",[tableCards.slice(0,3),handCards]);
+            socket.emit("sendCard",[tableCards.slice(0,3),handCards]);
         }
         else
             console.log("not enough cards (onStartGame)");
     });
 }
 
-function updatePlayerData(socket,playerData) {
-    if(socket.id == playerSockets[player_turn].id) {
-        players[player_turn] = playerData;
+function updatePlayerData(playerData) {
+    players[player_turn] = playerData;
 
-        if(playerData.lastBet > highestBet)
-            highestBet = playerData.lastBet;
+    if(playerData.lastBet > highestBet)
+        highestBet = playerData.lastBet;
 
-        let lastPlayerData = [playerData.number,playerData.lastAction,playerData.lastBet];
-        console.log("Update status to all players...");
+    let lastPlayerData = [playerData.number, playerData.name, playerData.lastBet, playerData.lastAction];
+    console.log("Update status to all players...");
+    console.log(lastPlayerData);
 
-        io.sockets.emit("updateLastPlayerStatus",[lastPlayerData,highestBet]);
-        console.log("Passing Turn...");
-        console.log("=====================");
-    }
+    io.sockets.emit("updateLastPlayerStatus",[lastPlayerData,highestBet]);
+    console.log("Passing Turn...");
+    console.log("=====================");
+}
+
+function restartGameS() {
+    gameStarted = false;
+    players.forEach(playerData => {
+        playerData.lastBet = 0;
+        playerData.lastAction = "None";
+        playerData.hand = [];
+        playerData.status = null;
+        playerData.cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        playerData.cardSymbolHist = [0, 0, 0, 0, 0];
+    });
+    io.sockets.emit("restartGame",getAllPublicPlayersData());
 }
 
 function disconnect(socket) {
@@ -219,11 +251,6 @@ function disconnect(socket) {
     playerSockets.splice(players.indexOf(socket,1));
     console.log('A user disconnected from the game.');
     if(players.length==0){
-        player_turn = 0;
-        turn_count = 0;
-        roundCount = 0;
-        highestBet = 20;
-        raiseTurnCount = null;
         gameStarted = false;
     }
 }

@@ -14,20 +14,27 @@ const text_winner_score     = document.getElementById("id_text_winner_score");
 const dialog_inputUsername  = document.getElementById("id_dialog_inputUsername");
 const input_username        = document.getElementById("id_input_username");
 const button_submitUsername = document.getElementById("id_button_submitUsername");
+const button_restartGame    = document.getElementById("id_button_restartGame");
+const zone_table_print      = document.getElementById("id_zone_table_print");
+const zone_hand_print       = document.getElementById("id_zone_hand_print");
 let highestBet = 20;
+let tableCard = [];
+let playerCount = 0;
 
 //joinGame();
 dialog_inputUsername.show();
 socket.on("cantJoin", () => {document.write("The game has already started.");});
 socket.on("takeSeat", (playerData) => {onTakeSeat(playerData);});
-socket.on("gameStarted", (cardsData) => {cardRecieveAndDisplay(cardsData);});
+socket.on("sendCard", (cardsData) => {cardRecieveAndDisplay(cardsData);});
 socket.on("blindBet", (betValue) => {setBlindBet(betValue)});
 socket.on("requestAction", () => {requestAction();});
 socket.on("setupStartGame", (startGameData) => {setupStartGame(startGameData);});
 socket.on("updateLastPlayerStatus", (lastPlayerData_highestBet) => {updateLastPlayerStatus(lastPlayerData_highestBet);});
 socket.on("addTableCard", (nextTableCard) => {addTableCard(nextTableCard);});
 socket.on("gameEnded", () => {gameEnded();});
-socket.on('returnWinner', (winnerData) => {showWinner(winnerData);});
+socket.on("returnWinner", (winnerData) => {showWinner(winnerData);});
+socket.on("restartGame", (allPublicPlayersData) => {restartGameC(allPublicPlayersData);});
+socket.on("newPlayerJoined", (allPublicPlayersData) => {newPlayerJoined(allPublicPlayersData);});
 
 function submitUsername() {
     if(input_username.value == "") {
@@ -54,8 +61,13 @@ function onTakeSeat(data) {
 }
 
 function startGame() {
-    socket.emit("startGame");
-    button_startGame.style.visibility = "hidden";
+    if(playerCount >= 2 && playerCount <= 6) {
+        socket.emit("startGame");
+        button_startGame.style.visibility = "hidden";
+    }
+    else{
+        alert("Player count must be between 2 - 6 players");
+    }
 }
 
 function cardRecieveAndDisplay(data) {
@@ -63,13 +75,13 @@ function cardRecieveAndDisplay(data) {
     playerData.hand = data[1];
     console.log(data[0].concat(data[1]));
     updateCardHist(data[0].concat(data[1]));
-    printCardArray(data[0],"id_zone_table_print",100);
-    printCardArray(data[1],"id_zone_hand_print",100);
+    printCardArray(data[0],zone_table_print,100);
+    printCardArray(data[1],zone_hand_print,100);
 }
 
 function addTableCard(data) {
     tableCard.push(data);
-    printCard(data,"id_zone_table_print",100);
+    printCard(data,zone_table_print,100);
     console.log(data);
     updateCardHist([data]);
 }
@@ -93,41 +105,53 @@ function scoreCheck() {
 }
 
 function setBlindBet(data) {
-    playerData.lastBet = data;
+    if(data[0] == playerData.number) playerData.lastBet = data[1];
+    list_status.rows[data[0]+2].cells[2].innerHTML = data[1];
 }
 function requestAction() {
     text_turnStatus.innerHTML = "Now is your turn!!!";
+    text_turnStatus.style.backgroundColor = "forestgreen";
     zone_action.style.visibility = "visible";
 }
-function setupStartGame(data) {
-    playerDataList = data[0];
-    highestBet = data[1];
-    playerDataList.forEach(playerData => {
-        let new_tableRow = document.createElement("tr");
-        let new_tableData1 = document.createElement("td");
-        let new_tableData2 = document.createElement("td");
-        let new_tableData3 = document.createElement("td");
-        let new_tableData4 = document.createElement("td");
-        new_tableData1.innerHTML = playerData.number;
-        new_tableData2.innerHTML = playerData.name;
-        new_tableData3.innerHTML = playerData.lastBet;
-        new_tableData4.innerHTML = playerData.lastAction;
-        new_tableRow.appendChild(new_tableData1);
-        new_tableRow.appendChild(new_tableData2);
-        new_tableRow.appendChild(new_tableData3);
-        new_tableRow.appendChild(new_tableData4);
-        list_status.appendChild(new_tableRow);
-        //new_listItem.innerHTML = "Player " + playerData.number + " : " + playerData.lastAction + " , " + playerData.lastBet;
-        //list_status.appendChild(new_listItem);
+
+function newPlayerJoined(allPublicPlayerData) {
+    playerCount = allPublicPlayerData.length;
+    console.log("new player joined");
+    while(list_status.rows.length > 2) list_status.deleteRow(2);
+    allPublicPlayerData.forEach(playerData => {
+        let new_tableRow = list_status.insertRow(list_status.length);
+        let new_tableData1 = new_tableRow.insertCell(0);
+        let new_tableData2 = new_tableRow.insertCell(1);
+        let new_tableData3 = new_tableRow.insertCell(2);
+        let new_tableData4 = new_tableRow.insertCell(3);
+        new_tableData1.innerHTML = playerData[0];
+        new_tableData2.innerHTML = playerData[1];
+        new_tableData3.innerHTML = playerData[2];
+        new_tableData4.innerHTML = playerData[3];
     });
+}
+
+function setupStartGame(data) {
+    highestBet = data;
     text_turnStatus.innerHTML = "Waiting for other players";
+    text_turnStatus.style.backgroundColor = "firebrick";
 }
 
 function updateLastPlayerStatus(data) {
+    console.log(data);
     highestBet = data[1];
-    listItems = list_status.querySelectorAll("tr");
-    listItems[data[0][0]+2].innerHTML = "Player " + data[0][0] + " : " + data[0][1] + " , " + data[0][2];
+    list_status.deleteRow(data[0][0]+2);
+    let new_tableRow = list_status.insertRow(data[0][0]+2);
+    let new_tableData1 = new_tableRow.insertCell(0);
+    let new_tableData2 = new_tableRow.insertCell(1);
+    let new_tableData3 = new_tableRow.insertCell(2);
+    let new_tableData4 = new_tableRow.insertCell(3);
+    new_tableData1.innerHTML = data[0][0];
+    new_tableData2.innerHTML = data[0][1];
+    new_tableData3.innerHTML = data[0][2];
+    new_tableData4.innerHTML = data[0][3];
     text_turnStatus.innerHTML = "Waiting for other players";
+    text_turnStatus.style.backgroundColor = "firebrick";
 }
 
 function gameEnded() {
@@ -136,6 +160,25 @@ function gameEnded() {
     let playerScore = scoreCheck();
     socket.emit('requestWinner', [playerData.number, playerScore]);
     text_player_score.innerHTML = 'Your highest score is:<br>' + scoreToText(playerScore);
+    if(playerData.number == 0) button_restartGame.style.visibility = "visible";
+}
+
+function requestRestartGame() {
+    socket.emit("requestRestartGame");
+}
+
+function restartGameC(allPublicPlayersData) {
+    zone_table_print.innerHTML = "";
+    zone_hand_print.innerHTML = "";
+    text_player_score.innerHTML = "";
+    text_winner_score.innerHTML = "";
+    text_playerLastAction.innerHTML = "None";
+    text_turnStatus.innerHTML = "Welcome";
+    text_turnStatus.style.backgroundColor = "black";
+    tableCard = [];
+    newPlayerJoined(allPublicPlayersData);
+    button_restartGame.style.visibility = "hidden";
+    if(playerData.number == 0) button_startGame.style.visibility = "visible";
 }
 
 function showWinner(winnerData) {
