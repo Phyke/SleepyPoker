@@ -52,6 +52,11 @@ tr,th,td {
     margin: 1.5%;
 }
 
+.winnerTable {
+    font-size: 1vw;
+    width: 50%;
+}
+
 #id_zone_playerInfo {
     padding-left: 20px;
     padding-right: 20px;
@@ -131,7 +136,21 @@ tr,th,td {
     padding-right: 20px;
 }
 
-#id_button_startGame {
+#id_dialog_gameRules {
+    margin-top: -23%;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+#id_dialog_gameRules_table {
+    font-size: 1vw;
+}
+
+.gameRuleItems {
+    font-size: 1vw;
+}
+
+.buttonStart {
     width: 100%;
     margin-top: 20px;
 }

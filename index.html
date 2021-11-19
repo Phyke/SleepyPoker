@@ -43,15 +43,70 @@
             <p>Your wallet: <span id="id_text_playerWallet"></span></p>
             <p>Your last action: <span id="id_text_playerLastAction"></span></p>-->
             <button onclick="showGameRules()">Game Rules</button>
-            <dialog id="id_dialog_gameRules" style="margin-top:1%;margin-left: 3%;padding-top: 3px;padding-bottom: 3px;">
-                <!--<p style="margin-top: 0;margin-bottom: 0;">Game Rules</p>-->
-                <ol style="margin-top: 0;margin-bottom: 0;">
-                    <li>First player is the host who can start the game.</li>
-                    <li>Minimum bet is 20$.</li>
-                    <li>Rule 3 lorem ipsum.</li>
-                    <li>Rule 4 lorem ipsum.</li>
+            <dialog id="id_dialog_gameRules">
+                <ol class="gameRuleItems" style="margin-bottom: 0;">
+                    <li class="gameRuleItems">The first player to join the game is host. (Who can start the game) Can only start when has player more than one.</li>
+                    <li class="gameRuleItems">All player starts the game with 100$.</li>
+                    <li class="gameRuleItems">Minimum bet is 20$.</li>
+                    <li class="gameRuleItems">Every game, player draws 2 cards and the table starts with 3 cards and draws new card at the end of round.
+                        <ul>
+                            <li class="gameRuleItems">1 Deck 52 Cards:  Suits: Spade Heart Diamond Clover</li>
+                            <li class="gameRuleItems">Rank: A K Q J 10 9 8 7 6 5 4 3 2</li>
+                        </ul>
+                    </li>
+                    <li class="gameRuleItems">Players can only take action during their turns.
+                        <ul>
+                            <li class="gameRuleItems">List of actions: Call, Check, Fold, Raise and All-in.</li>
+                            <li class="gameRuleItems">Call - Raise player's bet to equal the current highest bet.</li>
+                            <li class="gameRuleItems">Check - Pass their turn if player's bet is equal to highest bet.</li>
+                            <li class="gameRuleItems">Fold - Forfeit. Can't take any action after this.</li>
+                            <li class="gameRuleItems">Raise - Bet any amount of money that more than the current highest bet.</li>
+                            <li class="gameRuleItems">All-in - Use all of players money to bet. Can't take any action after this.</li>
+                        </ul>
+                    </li>
+                    <li class="gameRuleItems">At final round, players with highest card score win the game. If there are more than one winner, prize will be equally split.
+                        <br><b class="gameRuleItems">Rank of card scores</b> (The score is calculated by using cards from both player hand and table.)
+                        <table>
+                            <tr>
+                                <td class="gameRuleItems">Straight flush</td>
+                                <td class="gameRuleItems">5 cards in sequence with same suit. Highest rank: Royal straight flush: A K Q J 10 with same suit.</td>
+                            </tr>
+                            <tr>
+                                <td class="gameRuleItems">Four of a kind</td>
+                                <td class="gameRuleItems">4 cards with same value.</td>
+                            </tr>
+                            <tr>
+                                <td class="gameRuleItems">Full house</td>
+                                <td class="gameRuleItems">3 cards with same value and 2 cards with same value.</td>
+                            </tr>
+                            <tr>
+                                <td class="gameRuleItems">Flush</td>
+                                <td class="gameRuleItems">5 cards with same suit.</td>
+                            </tr>
+                            <tr>
+                                <td class="gameRuleItems">Straight</td>
+                                <td class="gameRuleItems">5 cards in sequence. Lowest straight: A 2 3 4 5</td>
+                            </tr>
+                            <tr>
+                                <td class="gameRuleItems">Three of a kind</td>
+                                <td class="gameRuleItems">3 cards with same value.</td>
+                            </tr>
+                            <tr>
+                                <td class="gameRuleItems">Two pairs</td>
+                                <td class="gameRuleItems">4 cards with 2 different pairs.</td>
+                            </tr>
+                            <tr>
+                                <td class="gameRuleItems">One pair</td>
+                                <td class="gameRuleItems">2 cards with same value.</td>
+                            </tr>
+                            <tr>
+                                <td class="gameRuleItems">High card</td>
+                                <td class="gameRuleItems">Comparing the highest card value in descending order: A K Q J 10 9 8 7 6 5 4 3 2 Lowest rank: 2</td>
+                            </tr>
+                        </table>
+                    </li>
                 </ol>
-                <button onclick="closeGameRules()">Close</button>
+                <div style="text-align: center;"><button onclick="closeGameRules()" style="margin-top:2px;">Close</button></div>
             </dialog>
         </div>
         <div class="column middle">
@@ -76,8 +131,9 @@
             </div>
         </div>
         <div class="column right" id="id_zone_otherPlayer">
-            <button onclick="startGame()" id="id_button_startGame" style="visibility: hidden;">Start Game</button>
-            <button onclick="requestRestartGame()" id="id_button_restartGame" style="visibility: hidden;">Restart Game</button>
+            <button onclick="startGame()" id="id_button_startGame" class="buttonStart" style="visibility: hidden;">Start Game</button>
+            <button onclick="requestRestartGame()" id="id_button_restartGame" class="buttonStart" style="visibility: hidden;">Restart Game</button>
+            <br><br>
             <table id="id_list_status">
                 <tr>
                     <th colspan="4">All players' status</th>
@@ -88,11 +144,23 @@
                     <th>Last Bet</th>
                     <th>Last Action</th>
                 </tr>
-            </table>
+            </table><br>
             <!--<p>All player status:</p>
             <ul id="id_list_status"></ul>-->
-            <p id="id_text_player_score"></p>
-            <p id="id_text_winner_score"></p>
+            <table id="id_zone_winner" style="visibility: hidden;">
+                <tr>
+                    <td class="winnerTable" style="font-weight: bold;">Your highest score</td>
+                    <td class="winnerTable" id="id_text_player_score"></td>
+                </tr>
+                <tr>
+                    <td class="winnerTable" style="font-weight: bold;">Winner Player Number</td>
+                    <td class="winnerTable" id="id_text_winner_playerno"></td>
+                </tr>
+                <tr>
+                    <td class="winnerTable" style="font-weight: bold;">Winner Score</td>
+                    <td class="winnerTable" id="id_text_winner_score"></td>
+                </tr>
+            </table>
         </div>
     </div>
     <script src="card.js"></script>
