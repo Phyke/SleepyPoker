@@ -187,7 +187,7 @@ function restartGameC(allPublicPlayersData) {
     playerData.hand = [];
     playerData.status = null;
     playerData.cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    playerData.cardSymbolHist = [0, 0, 0, 0, 0];
+    playerData.cardSuitHist = [0, 0, 0, 0, 0];
     newPlayerJoined(allPublicPlayersData);
     button_restartGame.style.visibility = "hidden";
     zone_winner.style.visibility = "hidden";

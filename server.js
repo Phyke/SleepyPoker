@@ -145,7 +145,7 @@ io.on('connect', (socket) => {
 
 function next_turn(){
     player_turn = (player_turn+1) % players.length;
-    while(players[player_turn].folded == true) {
+    while(players[player_turn].status == "Fold") {
         turn_count++;
         raiseTurnCount--;
         player_turn = (player_turn+1) % players.length;
@@ -254,20 +254,20 @@ function restartGameS() {
 
 function disconnect(socket) {
     let spliceTarget = playerSockets.indexOf(socket);
-    console.log("============Before players splice============");
+    /*console.log("============Before players splice============");
     console.log("splicetarget = ", spliceTarget);
     console.log(players);
-    console.log(playerSockets);
+    console.log(playerSockets);*/
     players.splice(spliceTarget,1);
-    console.log("============After players splice, Before sockets splice============");
+    /*console.log("============After players splice, Before sockets splice============");
     console.log("splicetarget = ", spliceTarget);
     console.log(players);
-    console.log(playerSockets,1);
+    console.log(playerSockets,1);*/
     playerSockets.splice(spliceTarget);
-    console.log("============After socketss splice============");
+    /*console.log("============After socketss splice============");
     console.log("splicetarget = ", spliceTarget);
     console.log(players);
-    console.log(playerSockets);
+    console.log(playerSockets);*/
     console.log('A user disconnected from the game.');
     io.sockets.emit("newPlayerJoined",getAllPublicPlayersData());
     if(players.length==0){
