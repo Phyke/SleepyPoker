@@ -55,7 +55,7 @@ function onTakeSeat(data) {
     playerData = data;
     console.log(data.cardValueHist);
     text_playerName.innerHTML = playerData.name;
-    text_playerNo.innerHTML = playerData.number;
+    text_playerNo.innerHTML = playerData.number + 1;
     text_playerWallet.innerHTML = playerData.wallet;
     if(playerData.number == 0) button_startGame.style.visibility = "visible";
 }
@@ -89,19 +89,19 @@ function addTableCard(data) {
 function updateCardHist(data) {
     for(let i = 0; i < data.length; i++) {
         playerData.cardValueHist[data[i].cardValue]++;
-        playerData.cardSymbolHist[data[i].cardSymbol]++;
+        playerData.cardSuitHist[data[i].cardSuit]++;
     }
-    console.log(playerData.cardSymbolHist, playerData.cardValueHist);
+    console.log(playerData.cardSuitHist, playerData.cardValueHist);
 }
 
 function scoreCheck() {
-    let scoreValue, scoreSymbol;
-    scoreSymbol = cardSymbolHistDetect(playerData.cardSymbolHist, tableCard.concat(playerData.hand));
-    scoreValue = cardValueHistDetect(playerData.cardValueHist);
-    console.log('score from value ', scoreValue, ' score from symbol ', scoreSymbol);
-    if(scoreValue[0] >= scoreSymbol[0])
+    let scoreValue, scoreSuit;
+    scoreValue = cardValueHistDetect(playerData.cardValueHist, tableCard.concat(playerData.hand));
+    scoreSuit = cardSuitHistDetect(playerData.cardSuitHist, tableCard.concat(playerData.hand));
+    console.log('score from value ', scoreValue, ' score from suit ', scoreSuit);
+    if(scoreValue[0] >= scoreSuit[0])
         return scoreValue;
-    return scoreSymbol;
+    return scoreSuit;
 }
 
 function setBlindBet(data) {
@@ -158,9 +158,19 @@ function gameEnded() {
     text_turnStatus.innerHTML = 'The game is ended.';
     zone_action.style.visibility = 'hidden';
     let playerScore = scoreCheck();
-    socket.emit('requestWinner', [playerData.number, playerScore]);
+
+    if(playerData.lastAction.localeCompare('Fold'))
+        socket.emit('requestWinner', [playerData.number, playerScore]);
     text_player_score.innerHTML = 'Your highest score is:<br>' + scoreToText(playerScore);
     if(playerData.number == 0) button_restartGame.style.visibility = "visible";
+}
+
+function showWinner(winnerData) {
+    let winnerNumber = winnerData[0], winnerScore = winnerData[1];
+    let winnerNumberText = '>';
+    for(let i = 0; i < winnerNumber.length; i++)
+        winnerNumberText = winnerNumberText + ' ' + winnerNumber[i];
+    text_winner_score.innerHTML = 'The winner is Player:<br>' + winnerNumberText + '<br><br>Winner score:<br>' + scoreToText(winnerScore);
 }
 
 function requestRestartGame() {
@@ -176,17 +186,11 @@ function restartGameC(allPublicPlayersData) {
     text_turnStatus.innerHTML = "Welcome";
     text_turnStatus.style.backgroundColor = "black";
     tableCard = [];
+    playerData.cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    playerData.cardSuitHist = [0, 0, 0, 0, 0];
     newPlayerJoined(allPublicPlayersData);
     button_restartGame.style.visibility = "hidden";
     if(playerData.number == 0) button_startGame.style.visibility = "visible";
-}
-
-function showWinner(winnerData) {
-    let winnerNumber = winnerData[0], winnerScore = winnerData[1];
-    let winnerNumberText = '>';
-    for(let i = 0; i < winnerNumber.length; i++)
-        winnerNumberText = winnerNumberText + ' ' + winnerNumber[i];
-    text_winner_score.innerHTML = 'The winner is Player:<br>' + winnerNumberText + '<br><br>Winner score:<br>' + scoreToText(winnerScore);
 }
 
 function fold() {

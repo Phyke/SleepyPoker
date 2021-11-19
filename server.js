@@ -52,7 +52,7 @@ class PLAYER {
         this.wallet = 100,
         this.hand = null,
         this.cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        this.cardSymbolHist = [0, 0, 0, 0, 0]
+        this.cardSuitHist = [0, 0, 0, 0, 0]
     }
 }
 
@@ -73,7 +73,7 @@ io.on('connect', (socket) => {
                 console.log("force disconnect user because not input username");
             }
             else {
-                joinGameS(socket,username);
+                joinGameS(socket, username);
             }
         });
         socket.on('startGame',() => {
@@ -119,10 +119,16 @@ io.on('connect', (socket) => {
         socket.on('requestWinner', (data) => {
             allPlayerScore.push(data);
             console.log('data recieve', data[0], data[1]);
-            if(allPlayerScore.length == players.length) {
+            
+            let foldedPlayer = players.filter(e => e.lastAction == 'Fold').length;
+
+            console.log(foldedPlayer);
+            if(allPlayerScore.length == players.length - foldedPlayer) {
                 console.log('allPlayerscore', allPlayerScore);
+
                 let winnerData = dealer.scoreComparison(allPlayerScore);
                 console.log('winnerData', winnerData);
+
                 playerSockets.forEach(socket => {
                     socket.emit('returnWinner', winnerData);
                 });
@@ -241,7 +247,7 @@ function restartGameS() {
         playerData.hand = [];
         playerData.status = null;
         playerData.cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        playerData.cardSymbolHist = [0, 0, 0, 0, 0];
+        playerData.cardSuitHist = [0, 0, 0, 0, 0];
     });
     io.sockets.emit("restartGame",getAllPublicPlayersData());
 }
