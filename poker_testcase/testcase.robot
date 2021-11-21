@@ -5,8 +5,7 @@ Library     Selenium2Library
 ${url}  http://localhost:5000/
 ${browser}  chrome
 
-***comments***
---in progress--
+***Test Cases***
 Test: enter name, open gamerules
     Open browser  ${url}  ${browser}
     Input Text  id=id_input_username  player1
@@ -14,7 +13,7 @@ Test: enter name, open gamerules
     Sleep  1s
     Element Should Contain  id=id_text_playerName  player1
     Click Element  //*[contains(text(),'Game Rules')]
-    Page Should Contain  First player is the host who can start the game.
+    Page Should Contain  The first player to join the game is host.
     Click element  //*[contains(text(),'Close')]    
 Test: startgame with 1 player
     Click element  id=id_button_startGame
@@ -26,9 +25,17 @@ Test: startgame with 2 players
     Click element  id=id_button_submitUsername
     Sleep  1s
     Element Should Contain  id=id_text_playerName  player2
+    Switch browser  1
+    Click element  id=id_button_startGame
 Test: player2 Check
+    Switch browser  2
     Click element  id=id_button_check
     Alert Should be present  You can't check, you need to call or raise
+Test: player1,2 Call
+    Click element  id=id_button_call
+    Switch browser  1
+    Click element  id=id_button_call
+    Alert Should be present  You need to check (not call).
 ***comments***    
 Test: call
     Click element  id=id_button_call
@@ -61,7 +68,7 @@ Test: All-in
 ***comments***
 This test case test success scenario: game can end and show the winner 
 by using basic method(only call and check)//all pass    
-***Test Cases***
+
 Initial all user and position
     Open browser  ${url}  ${browser}
     Input Text  id=id_input_username  player1
