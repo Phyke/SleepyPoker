@@ -1,13 +1,37 @@
+/*
+card.js
+ 
+Implements _CARD.
+_CARD is a class with 3 parameters.
+    - Card value ranged from 2 - 14, 11 - 14 represent jack to ace.
+    - Card suit ranged from 1 - 4 represent clover, diamond, heart, and spade.
+    - image path for display in html element
+ 
+Include functions to
+    - build card deck
+    - draw random and specific card
+    - sort card
+    - find poker score from card values and suits histogram
+    - compare score and display card
+    - display card
+ 
+ Created by Prombot Cherdchoo and Wanna Wannasin
+ This file is built for online poker game project in CPE327 class.
+ */
+
+//define number value for card suit
 const SPADE = 4;
 const HEART = 3;
 const DIAMOND = 2;
 const CLOVER = 1;
 
+//define number value for non-number card value
 const ACE = 14;
 const KING = 13;
 const QUEEN = 12;
 const JACK = 11;
 
+//define number value for score ranking, OAK stand for of a kind
 const STRAIGHT_FLUSH = 8;
 const FOUR_OAK = 7;
 const FULL_HOUSE = 6;
@@ -18,10 +42,15 @@ const TWO_PAIR = 2;
 const PAIR = 1;
 const HIGH_CARD = 0;
 
+//built in card deck
 let deck = [];
-let cardValueHistogram = [];
-let cardSuitHistogram = [];
 
+/*
+card is a class with 3 parameters.
+    - Card value ranged from 2 - 14, 11 - 14 represent jack to ace.
+    - Card suit ranged from 1 - 4 represent clover, diamond, heart, and spade.
+    - image path for display in html element
+*/
 class card {
     constructor(cardSuit, cardValue, imgPath) {
         this.cardSuit = cardSuit;
@@ -30,18 +59,37 @@ class card {
     }
 }
 
+//comparator function for _CARD class, sort card by its value and suit in descending order
 function cardSortProperty(A, B) {
     if(A.cardValue != B.cardValue)
         return B.cardValue - A.cardValue;
     return B.cardSuit - A.cardSuit;
 }
 
+/*
+Required parameter
+    - cardValueHist:    histogram of cards in player hand and community card (table card) represented in array
+                        cardValueHist[i] means the number of cards in hand or table which thier value is i
+    - cards:            array of _CARD from player's hand and community card.
+
+This function is used to find card score from card value histogram, then find kicker card value
+
+return parameter pattern is [score, [value1, /value2, /..., /kicker1, /kicker2, /...]]
+    - score:    number value for score ranking as defined above
+    - valueN:   n-th value of score ranking
+    (optional)
+    - kickerN:   n-th kicker card
+
+    example:
+        [3, [5, 8, 4]] means this hand win three of a kind with 3 fives, with 2 kickers which are eight and four
+        [6, [7, 4, 6]] mean this hand win full house with 3 sevens and 2 fours, with a kicker which are six
+*/
 function cardValueHistDetect (cardValueHist, cards) {
     let winningCard;
     let max = Math.max(...cardValueHist);
     cards.sort(cardSortProperty);
 
-    console.log("Maximum value in value histogram is %d\n", max);
+    console.log('Maximum value in value histogram is %d\n', max);
     if(max >= 4) {
         winningCard = cardValueHist.lastIndexOf(max);
         cards = cards.filter(thisCard => thisCard.cardValue != winningCard);
@@ -172,14 +220,14 @@ function scoreComparison(allPlayerScore) {
 //creating a deck which represent a physical deck which we can add cards to it or draw cards from it.
 //the physical deck is not contain duplicated cards.
 function buildDeck() {
-    const cardType = ["C","D","H","S"];
-    const cardValue =  ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+    const cardType = ['C','D','H','S'];
+    const cardValue =  ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
     deck = [];
     try
     {
         for(let i = 0; i < 4; i++) {
             for(let j = 0; j < 13; j++) {
-                deck.push(new card(i + 1, j + 2, "c_img/" + cardType[i] + cardValue[j] + ".png"));
+                deck.push(new card(i + 1, j + 2, 'c_img/' + cardType[i] + cardValue[j] + '.png'));
             }
         }
     }
@@ -197,11 +245,11 @@ function buildDeck() {
 /*function addCard(card, targetArray) {
     let foundCard = targetArray.filter(e => e.cardName == card.cardName).length;
     if(foundCard) {
-        console.log("Card " + card.cardName + " is already exist in targetArray");
+        console.log('Card ' + card.cardName + ' is already exist in targetArray');
         return false;
     }
     else {
-        console.log("Card " + card.cardName + " is added into targetArray");
+        console.log('Card ' + card.cardName + ' is added into targetArray');
         deck.push(card);
         return true;
     }
@@ -213,13 +261,13 @@ function buildDeck() {
 function pickCard(card) {
     let foundCard = deck.filter(e => e.cardValue == card.cardValue && e.cardSuit == card.cardSuit).length;
     if(!foundCard) {
-        console.log("Card " + card.cardName + " is not exist in deck");
+        console.log('Card ' + card.cardName + ' is not exist in deck');
         return false;
     }
     else {
         let index = deck.findIndex(e => e.cardValue == card.cardValue && e.cardSuit == card.cardSuit);
         let drawedCard = deck.splice(index,1);
-        console.log("Card " + drawedCard[0].cardName + " is drawn from deck");
+        console.log('Card ' + drawedCard[0].cardName + ' is drawn from deck');
         return drawedCard[0];
     }
 }
@@ -235,7 +283,7 @@ function drawCard(drawCount) {
         let randomIndex = Math.floor(Math.random() * deck.length);
         let drawedCard = deck.splice(randomIndex, 1);
         
-        console.log("Card " + drawedCard[0].cardSuit + " " + drawedCard[0].cardValue + " is drawn from targetArray");
+        console.log('Card ' + drawedCard[0].cardSuit + ' ' + drawedCard[0].cardValue + ' is drawn from targetArray');
         drawedCardList.push(drawedCard[0]);
     }
 
@@ -244,17 +292,17 @@ function drawCard(drawCount) {
 
     else
     {
-        console.log("Not enough card to draw, please start game again");
+        console.log('Not enough card to draw, please start game again');
         return false;
     }
 }
 
 function printCard (card, targetHtmlElement, width) {
-    const element_cardImg = document.createElement("img");
+    const element_cardImg = document.createElement('img');
 
     element_cardImg.src = card.imgPath;
     //element_cardImg.width = width;
-    element_cardImg.className = "cardimg";
+    element_cardImg.className = 'cardimg';
     targetHtmlElement.appendChild(element_cardImg);
 }
 
@@ -291,8 +339,10 @@ function scoreToText(score) {
     else if(score[0] == FULL_HOUSE)
         text = 'Full house with ' + score[1][0] + ' and ' + score[1][1];
 
-    else if(score[0] == FLUSH)
-        text = 'Flush with ' + score[1][0] + ' ' + score[1][1] + ' ' + score[1][2] + ' ' + score[1][3] + ' ' + score[1][4];
+    else if(score[0] == FLUSH){
+        text = 'Flush with';
+        score[1].forEach(s => text = text + ' ' + s);
+    }
 
     else if(score[0] == STRAIGHT)
         text = 'Straight with high card ' + score[1][0];
@@ -309,16 +359,18 @@ function scoreToText(score) {
         text = 'Pair with ' + score[1][0];
         text = text + '<br>Kicker Cards: ' + score[1][1] + ' ' + score[1][2] + ' ' + score[1][3];
     }
-    else
-        text = 'High card<br>Kicker Cards: ' + score[1][0] + ' ' + score[1][1] + ' ' + score[1][2] + ' ' + score[1][3] + ' ' + score[1][4];
+    else {
+        text = 'High card<br>Kicker Cards:';
+        score[1].forEach(s => text = text + ' ' + s);
+    }
     
     return text;
 }
 
-//printCard(deck[0],"table",100);
-//printCardArray(deck,"output",100);
-//printCardArray(drawRandomCard(5,deck),"table",100);
-//printCardArray(drawRandomCard(5,deck),"hand",100);
+//printCard(deck[0],'table',100);
+//printCardArray(deck,'output',100);
+//printCardArray(drawRandomCard(5,deck),'table',100);
+//printCardArray(drawRandomCard(5,deck),'hand',100);
 
 module.exports = {
     card,
