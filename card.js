@@ -181,9 +181,42 @@ function cardSuitHistDetect (cardSuitHist, cards) {
 
 function scoreComparison(allPlayerScore) {
     let i, j;
-    let winnerNumber = [], winnerScore = allPlayerScore[0][1];
-    winnerNumber.push(allPlayerScore[0][0]);
+    let winnerNumber = [-1], winnerScore = [-1, []];
 
+    allPlayerScore.forEach(playerScore => {
+
+        let number = playerScore[0], score = playerScore[1];
+        console.log('current player: ', number);
+        console.log('current score: ', score);
+        
+        if(winnerScore[0] < score[0]){
+            winnerNumber = [number];
+            winnerScore = score;
+        }
+        else if(winnerScore[0] == score[0]) {
+
+            for(i = 0; i < score[1].length; i++){
+
+                if(winnerScore[1][i] != score[1][i]){
+
+                    if(winnerScore[1][i] < playerScore[1][i]){
+                        winnerNumber = [number];
+                        winnerScore = score;
+                    }
+
+                    break;
+                }
+
+                else if(i == score[1].length - 1)
+                    winnerNumber.push(number)
+                
+            }
+        }
+        
+        console.log('current winning player: ', winnerNumber);
+        console.log('current winning score: ', winnerScore);
+    });
+    /*
     for(i = 1; i < allPlayerScore.length; i++) {
         console.log('current winning player: ', winnerNumber);
         console.log('current winning score: ', winnerScore);
@@ -208,7 +241,7 @@ function scoreComparison(allPlayerScore) {
             winnerNumber.push(allPlayerScore[i][0]);
             winnerScore = currentScore;
         }
-    }
+    }*/
     return [winnerNumber, winnerScore];
 }
 

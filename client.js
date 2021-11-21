@@ -178,9 +178,9 @@ function updateWallet(wallet) {
 
 function showWinner(winnerData) {
     let winnerNumber = winnerData[0], winnerScore = winnerData[1];
-    let winnerNumberText = winnerNumber[0] + 1;
-    for(let i = 1; i < winnerNumber.length; i++)
-        winnerNumberText = winnerNumberText + ', ' + winnerNumber[i] + 1;
+    let winnerNumberText = '';
+    winnerNumber.forEach(number => winnerNumberText = winnerNumberText.concat((number + 1).toString() + ', '));
+    winnerNumberText = winnerNumberText.slice(0, winnerNumberText.length - 2);
     text_winner_playerno.innerHTML = winnerNumberText;
     text_winner_score.innerHTML = scoreToText(winnerScore);
     zone_winner.style.visibility = 'visible';

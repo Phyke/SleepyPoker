@@ -97,21 +97,21 @@ io.on('connect', (socket) => {
             //resetTimeOut();
             updatePlayerData(playerData);
 
-            if(playerData.lastAction == 'Raise' || playerData.lastAction == 'All-In')
-                raiseTurnCount = players.filter(player => player.lastAction != 'Fold' && player.lastAction != 'All-In').length;
+            if(playerData.lastAction == 'Raise')
+                raiseTurnCount = players.filter(player => player.lastAction != 'Fold' && player.lastAction != 'All-In').length - 1;
             else
                 raiseTurnCount--;
 
             console.log('raiseTurnCount = ', raiseTurnCount);
 
-            if(raiseTurnCount <= 0) {
+            if(raiseTurnCount < 0) {
                 roundCount++;
                 if(roundCount == 3) io.sockets.emit('gameEnded');
                 else{
-                    raiseTurnCount = players.filter(player => player.lastAction != 'Fold' && player.lastAction != 'All-In').length;
+                    raiseTurnCount = players.filter(player => player.lastAction != 'Fold' && player.lastAction != 'All-In').length - 1;
                     console.log('resetting raiseTurnCount => now raiseTurnCount = ' , raiseTurnCount);
                     console.log('roundCount = ', roundCount);
-                    io.sockets.emit('addTableCard',tableCards[roundCount+2]);
+                    io.sockets.emit('addTableCard',tableCards[roundCount + 2]);
                 }
             }
 
@@ -139,6 +139,7 @@ io.on('connect', (socket) => {
                     console.log("pot during plus = ", pot);
                     player.wallet = player.wallet - player.lastBet;
                 });
+
                 console.log("pot before = ",pot);
                 console.log("winnerData.length = ",winnerData[0].length);
                 pot = Math.round(pot / winnerData[0].length);
