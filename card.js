@@ -187,29 +187,26 @@ function scoreComparison(allPlayerScore) {
     for(i = 1; i < allPlayerScore.length; i++) {
         console.log('current winning player: ', winnerNumber);
         console.log('current winning score: ', winnerScore);
-        let currentPlayerScore = allPlayerScore[i][1];
+        let currentScore = allPlayerScore[i][1];
 
-        if(winnerScore[0] < currentPlayerScore[0])
+        if(winnerScore[0] < currentScore[0])
             winnerNumber = [];
         
-        else if(winnerScore[0] == currentPlayerScore[0]) {
-            for(j = 0; j < currentPlayerScore[1].length; j++) {
-                if(winnerScore[1][j] != currentPlayerScore[1][j]) {
-                    if(winnerScore[1][j] < currentPlayerScore[1][j])
-                        winnerNumber = [];
+        else if(winnerScore[0] == currentScore[0]) {
+            for(j = 0; j < currentScore[1].length; j++) {
+                if(winnerScore[1][j] < currentScore[1][j]) {
+                    winnerNumber = [];
                     break;
                 }
-                else if(j == currentPlayerScore[1].length - 1)
-                    winnerNumber.push(allPlayerScore[i][0]);
             }
-            if(j == currentPlayerScore[1].length) {
+            if(winnerNumber.length) {
                 winnerNumber.push(allPlayerScore[i][0]);
             }
         }
 
         if(!winnerNumber.length) {
             winnerNumber.push(allPlayerScore[i][0]);
-            winnerScore = currentPlayerScore;
+            winnerScore = currentScore;
         }
     }
     return [winnerNumber, winnerScore];
