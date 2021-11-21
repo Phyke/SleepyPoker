@@ -39,6 +39,8 @@ let minimumBet = 20;
 let raiseTurnCount;
 let roundCount = 0;
 let allPlayerScore = [];
+let forceDisconnect = false;
+let connectCount = -1;
 //let timeOut;
 //const MAX_WAITING = 5000;
 
@@ -63,6 +65,7 @@ io.on('connect', (socket) => {
         console.log("The game has already started.");
         socket.emit("cantJoin");
         socket.disconnect();
+        forceDisconnect = 1;
         console.log("force disconnect user because join after game started");
     }
     else {
@@ -70,9 +73,11 @@ io.on('connect', (socket) => {
             if(gameStarted){
                 socket.emit("cantJoin");
                 socket.disconnect();
+                forceDisconnect = 1;
                 console.log("force disconnect user because not input username");
             }
             else {
+                connectCount++;
                 joinGameS(socket, username);
             }
         });
@@ -85,6 +90,7 @@ io.on('connect', (socket) => {
             raiseTurnCount = players.length;
             allPlayerScore = [];
             setBlindBetS();
+            io.sockets.emit("newPlayerJoined",getAllPublicPlayersData());
             io.sockets.emit("setupStartGame",minimumBet);
             sendCardtoPlayers();
             next_turn();
@@ -139,7 +145,10 @@ io.on('connect', (socket) => {
             restartGameS();
         });
     
-        socket.on('disconnect', () => {disconnect(socket);});
+        socket.on('disconnect', () => {
+            if(forceDisconnect) forceDisconnect = false;
+            else disconnect(socket);
+        });
     }
 });
 
@@ -155,6 +164,9 @@ function next_turn(){
     
     else {
         console.log("player_turn before emit = ",player_turn);
+        playerSockets.forEach(eachsocket => {
+            console.log("socket id :" + eachsocket.id);
+        });
         playerSockets[player_turn].emit('requestAction');
         console.log("turn count = " , turn_count);
         console.log("player turn = " , player_turn);
@@ -186,7 +198,7 @@ function getAllPublicPlayersData() {
 
 function joinGameS(socket,username) {
     playerSockets.push(socket);
-    let newPlayer = new PLAYER(username,players.length);
+    let newPlayer = new PLAYER(username,connectCount);
     players.push(newPlayer);
     socket.emit('takeSeat',newPlayer);
     io.sockets.emit("newPlayerJoined",getAllPublicPlayersData());
@@ -194,11 +206,13 @@ function joinGameS(socket,username) {
 
 function setBlindBetS() {
     player_turn = (player_turn+1) % players.length;
+    console.log("set small blind for player ", player_turn);
     players[player_turn].lastBet = minimumBet/2;
-    io.sockets.emit("blindBet",[player_turn,minimumBet/2]);
+    io.sockets.emit("blindBet",[players[player_turn].number,minimumBet/2]);
     player_turn = (player_turn+1) % players.length;
+    console.log("set big blind for player ", player_turn);
     players[player_turn].lastBet = minimumBet;
-    io.sockets.emit("blindBet",[player_turn,minimumBet]);
+    io.sockets.emit("blindBet",[players[player_turn].number,minimumBet]);
 }
 
 function sendCardtoPlayers() {
@@ -233,8 +247,8 @@ function updatePlayerData(playerData) {
     let lastPlayerData = [playerData.number, playerData.name, playerData.lastBet, playerData.lastAction];
     console.log("Update status to all players...");
     console.log(lastPlayerData);
-
-    io.sockets.emit("updateLastPlayerStatus",[lastPlayerData,highestBet]);
+    io.sockets.emit("newPlayerJoined",getAllPublicPlayersData());
+    io.sockets.emit("updateLastPlayerStatus",highestBet);
     console.log("Passing Turn...");
     console.log("=====================");
 }
@@ -262,8 +276,8 @@ function disconnect(socket) {
     /*console.log("============After players splice, Before sockets splice============");
     console.log("splicetarget = ", spliceTarget);
     console.log(players);
-    console.log(playerSockets,1);*/
-    playerSockets.splice(spliceTarget);
+    console.log(playerSockets);*/
+    playerSockets.splice(spliceTarget,1);
     /*console.log("============After socketss splice============");
     console.log("splicetarget = ", spliceTarget);
     console.log(players);
