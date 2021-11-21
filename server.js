@@ -135,11 +135,15 @@ io.on('connect', (socket) => {
 
                 let pot = 0;
                 players.forEach(player => {
-                    pot += player.lastBet;
-                    player.wallet -= player.lastBet;
-                })
-
-                winnerData[0].forEach(winner => players[winner].wallet += pot / winnerData[0].length);
+                    pot = pot + player.lastBet;
+                    console.log("pot during plus = ", pot);
+                    player.wallet = player.wallet - player.lastBet;
+                });
+                console.log("pot before = ",pot);
+                console.log("winnerData.length = ",winnerData[0].length);
+                pot = Math.round(pot / winnerData[0].length);
+                console.log("pot after = ",pot);
+                winnerData[0].forEach(winner => players[winner].wallet += pot);
 
                 playerSockets.forEach(socket => socket.emit('updateWallet', players[playerSockets.indexOf(socket)].wallet));
                 io.sockets.emit('returnWinner', winnerData);

@@ -252,23 +252,25 @@ function call() {
 }
 
 function raise() {
-    console.log('Comparing input_raiseValue.value = ' + input_raiseValue.value + 'vs highestBet = ' + highestBet);
-    if(input_raiseValue.value <= highestBet) {
+    let raiseValue = parseInt(input_raiseValue.value);
+    console.log('Comparing raiseValue = ' + raiseValue + 'vs highestBet = ' + highestBet);
+    if(raiseValue <= highestBet) {
         alert('You must raise more than current highest bet');
     } 
-    else if(input_raiseValue.value > playerData.wallet) {
+    else if(raiseValue > playerData.wallet) {
         alert('You do not have enough money.');
     }
-    else if(playerData.wallet == input_raiseValue.value)
+    else if(playerData.wallet == raiseValue)
         allIn();
     else {
         playerData.lastAction = 'Raise';
-        playerData.lastBet = input_raiseValue.value;
+        playerData.lastBet = raiseValue;
         socket.emit('passTurn', playerData);
         text_playerLastAction.innerHTML = 'Raise';
         zone_action.style.visibility = 'hidden';
     }
-    input_raiseValue.value = '';
+    raiseValue = 0;
+    console.log(typeof(raiseValue));
 }
 
 function allIn() {
