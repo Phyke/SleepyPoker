@@ -111,8 +111,9 @@ function scoreCheck() {
 }
 
 function setBlindBet(data) {
+    console.log(data);
     if(data[0] == playerData.number) playerData.lastBet = data[1];
-    list_status.rows[data[0]+2].cells[2].innerHTML = data[1];
+    //list_status.rows[data[0]+2].cells[2].innerHTML = data[1];
 }
 function requestAction() {
     text_turnStatus.innerHTML = 'Now is your turn!!!';
@@ -144,9 +145,9 @@ function setupStartGame(data) {
 }
 
 function updateLastPlayerStatus(data) {
-    console.log(data);
-    highestBet = data[1];
-    list_status.deleteRow(data[0][0]+2);
+    //console.log(data);
+    highestBet = data;
+    /*list_status.deleteRow(data[0][0]+2);
     let new_tableRow = list_status.insertRow(data[0][0]+2);
     let new_tableData1 = new_tableRow.insertCell(0);
     let new_tableData2 = new_tableRow.insertCell(1);
@@ -155,9 +156,9 @@ function updateLastPlayerStatus(data) {
     new_tableData1.innerHTML = data[0][0]+1; // plus one for user understanding
     new_tableData2.innerHTML = data[0][1];
     new_tableData3.innerHTML = data[0][2];
-    new_tableData4.innerHTML = data[0][3];
-    text_turnStatus.innerHTML = 'Waiting for other players';
-    text_turnStatus.style.backgroundColor = 'firebrick';
+    new_tableData4.innerHTML = data[0][3];*/
+    text_turnStatus.innerHTML = "Waiting for other players";
+    text_turnStatus.style.backgroundColor = "firebrick";
 }
 
 function gameEnded() {
