@@ -237,11 +237,10 @@ function call() {
     if(playerData.wallet < highestBet) {
         alert('You do not have enough money.');
     }
-    if(playerData.lastBet == highestBet) {
+    else if(playerData.lastBet == highestBet) {
         alert('You need to check (not call).');
     }
-
-    if(playerData.wallet == highestBet)
+    else if(playerData.wallet == highestBet)
         allIn();
     else {
         playerData.lastAction = 'Call';
@@ -260,7 +259,7 @@ function raise() {
     else if(input_raiseValue.value > playerData.wallet) {
         alert('You do not have enough money.');
     }
-    if(playerData.wallet == input_raiseValue.value)
+    else if(playerData.wallet == input_raiseValue.value)
         allIn();
     else {
         playerData.lastAction = 'Raise';

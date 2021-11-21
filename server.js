@@ -279,5 +279,6 @@ function disconnect(socket) {
     io.sockets.emit('newPlayerJoined',getAllPublicPlayersData());
     if(players.length==0){
         gameStarted = false;
+        connectCount = -1;
     }
 }
