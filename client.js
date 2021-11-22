@@ -34,7 +34,7 @@ socket.on('blindBet', (betValue) => {setBlindBet(betValue)});
 socket.on('sendCard', (cardsData) => {cardRecieveAndDisplay(cardsData);});
 
 socket.on('requestAction', () => {requestAction();});
-socket.on('updateLastPlayerStatus', (lastPlayerData_highestBet) => {updateLastPlayerStatus(lastPlayerData_highestBet);});
+socket.on('updateHighestBet', (lastPlayerData_highestBet) => {updateHighestBet(lastPlayerData_highestBet);});
 socket.on('addTableCard', (nextTableCard) => {addTableCard(nextTableCard);});
 
 socket.on('gameEnded', () => {gameEnded();});
@@ -144,10 +144,10 @@ function setupStartGame(data) {
     text_turnStatus.style.backgroundColor = 'firebrick';
 }
 
-function updateLastPlayerStatus(data) {
+function updateHighestBet(newHighestBet) {
     //console.log(data);
-    highestBet = data;
-    /*list_status.deleteRow(data[0][0]+2);
+    /*
+    list_status.deleteRow(data[0][0]+2);
     let new_tableRow = list_status.insertRow(data[0][0]+2);
     let new_tableData1 = new_tableRow.insertCell(0);
     let new_tableData2 = new_tableRow.insertCell(1);
@@ -156,7 +156,9 @@ function updateLastPlayerStatus(data) {
     new_tableData1.innerHTML = data[0][0]+1; // plus one for user understanding
     new_tableData2.innerHTML = data[0][1];
     new_tableData3.innerHTML = data[0][2];
-    new_tableData4.innerHTML = data[0][3];*/
+    new_tableData4.innerHTML = data[0][3];
+    */
+    highestBet = newHighestBet;
     text_turnStatus.innerHTML = "Waiting for other players";
     text_turnStatus.style.backgroundColor = "firebrick";
 }
