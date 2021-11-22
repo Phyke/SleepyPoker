@@ -199,7 +199,7 @@ function scoreComparison(allPlayerScore) {
 
                 if(winnerScore[1][i] != score[1][i]){
 
-                    if(winnerScore[1][i] < playerScore[1][i]){
+                    if(winnerScore[1][i] < score[1][i]){
                         winnerNumber = [number];
                         winnerScore = score;
                     }

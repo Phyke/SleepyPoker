@@ -106,7 +106,7 @@ io.on('connect', (socket) => {
 
             let activePlayer = players.filter(player => player.lastAction != 'Fold' && player.lastAction != 'All-In').length - 1;
 
-            if(playerData.lastAction == 'Raise')
+            if(playerData.lastAction == 'Raise' || playerData.lastAction == 'All-In')
                 raiseTurn = activePlayer;
             else
                 raiseTurn--;
