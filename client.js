@@ -201,6 +201,7 @@ function restartGameC(allPublicPlayersData) {
     text_playerLastAction.innerHTML = 'None';
     text_turnStatus.innerHTML = 'Welcome';
     text_turnStatus.style.backgroundColor = 'black';
+    input_raiseValue.value = '0';
     tableCard = [];
     highestBet = 20;
     console.log(allPublicPlayersData);
