@@ -44,6 +44,8 @@ let round = 0;
 
 let forceDisconnect = false;
 let connectCount = -1;
+
+let disconnectedPlayerList = [];
 //let timeOut;
 //const MAX_WAITING = 5000;
 
@@ -140,11 +142,17 @@ io.on('connect', (socket) => {
         });
 
         socket.on('requestRestartGame', () => {
+            clearDisconnectedPlayer();
             restartGame();
         });
     
         socket.on('disconnect', () => {
             if(forceDisconnect) forceDisconnect = false;
+            else if(gameStarted){
+                disconnectForceFold(socket);
+                raiseTurn--;
+                if(playerTurn == playerSockets.indexOf(socket)) nextTurn();
+            }
             else disconnect(socket);
         });
     }
@@ -300,4 +308,20 @@ function disconnect(socket) {
         gameStarted = false;
         connectCount = -1;
     }
+}
+
+function disconnectForceFold(socket){
+    let playerIndex = playerSockets.indexOf(socket);
+    disconnectedPlayerList.push(playerIndex);
+    players[playerIndex].lastAction = "Fold";
+    console.log('A user disconnected from the game, during the game.');
+    io.sockets.emit('newPlayerJoined',getAllPublicPlayersData());
+}
+
+function clearDisconnectedPlayer(){
+    disconnectedPlayerList.forEach(playerIndex => {
+        players.splice(playerIndex,1);
+        playerSockets.splice(playerIndex,1);
+    });
+    disconnectedPlayerList = [];
 }

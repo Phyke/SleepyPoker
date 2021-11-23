@@ -291,3 +291,10 @@ function showGameRules() {
 function closeGameRules() {
     dialog_gameRules.close();
 }
+
+input_username.addEventListener("keydown", (event) => {
+    if(event.key == "Enter") {
+        event.preventDefault();
+        button_submitUsername.click();
+    }
+});
