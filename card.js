@@ -1,8 +1,8 @@
 /*
 card.js
  
-Implements _CARD.
-_CARD is a class with 3 parameters.
+Implements card.
+card is a class with 3 parameters.
     - Card value ranged from 2 - 14, 11 - 14 represent jack to ace.
     - Card suit ranged from 1 - 4 represent clover, diamond, heart, and spade.
     - image path for display in html element
@@ -67,10 +67,17 @@ function cardSortProperty(A, B) {
 }
 
 /*
+cardValueHistScoring is used to find highest score from player's card value histogram which could be
+    - Four of a kind: 4  cards in same value
+    - Three house: 3 cards in same value and 2 cards in same value
+    - Three of a kind: 3 cards in same value
+    - Two pair: 2 cards in same value and another 2 card in another value
+    - Pair: 2 cards in same value
+
 Required parameter
     - cardValueHist:    histogram of cards in player hand and community card (table card) represented in array
                         cardValueHist[i] means the number of cards in hand or table which thier value is i
-    - cards:            array of _CARD from player's hand and community card.
+    - cards:            array of card from player's hand and community card.
 
 This function is used to find card score from card value histogram, then find kicker card value
 
@@ -84,98 +91,199 @@ return parameter pattern is [score, [value1, /value2, /..., /kicker1, /kicker2, 
         [3, [5, 8, 4]] means this hand win three of a kind with 3 fives, with 2 kickers which are eight and four
         [6, [7, 4, 6]] mean this hand win full house with 3 sevens and 2 fours, with a kicker which are six
 */
-function cardValueHistDetect (cardValueHist, cards) {
+function cardValueHistScoring (cardValueHist, cards) {
+    //winningCard is value of card with highest score
     let winningCard;
+
+    //find the most repeating card value
     let max = Math.max(...cardValueHist);
+
+    //sort card by value in descending order to find kicker card later
     cards.sort(cardSortProperty);
 
-    console.log('Maximum value in value histogram is %d\n', max);
+    console.log('notice: Most repeating card calue in value histogram is %d\n', max);
+
+    //4 cards repeating, return four of a kind
     if(max >= 4) {
+    
+        //winningCard is most value that have 4 repeating cards
         winningCard = cardValueHist.lastIndexOf(max);
+
+        //find kicker card by filter winningCard out
         cards = cards.filter(thisCard => thisCard.cardValue != winningCard);
+
+        /*
+        return
+        score = four of a kind,
+        value1 = winningCard, 
+        kicker1 = highest value card
+        */
         return [FOUR_OAK, [winningCard, cards[0].cardValue]];
     }
-    if(max == 3)
-    {
+
+    //3 cards repeating, continue to find fullhouse or three of a kind
+    if(max == 3) {
+        //winningCard is most value that have 3 repeating cards
         winningCard = cardValueHist.lastIndexOf(3);
+
+        //filter winningCard out
         cards = cards.filter(thisCard => thisCard.cardValue != winningCard);
-        let len = cards.length;
-        if(cardValueHist.includes(2)) {
-            return [FULL_HOUSE, [winningCard, cardValueHist.lastIndexOf(2)]];
-        }
+        cardValueHist.splice(winningCard, 1);
+
+        //find next most repeating card
+        max = Math.max(...cardValueHist);
+
+        /*
+        if found any pair, return
+        score = full house,
+        value1 = winningCard,
+        value2 = value of found pair
+        */
+        if(max >= 2)
+            return [FULL_HOUSE, [winningCard, cardValueHist.lastIndexOf(max)]];
+
+        /*
+        if not found any pair, return
+        score = three of a kind,
+        value1 = winningCard,
+        kicker1 = most value card,
+        kicker2 = secondth most value card
+        */
         return [THREE_OAK, [winningCard, cards[0].cardValue, cards[1].cardValue]];
     }
-    if(max == 2)
-    {
+
+    //2 cards repeating, continue to find two pair or return pair
+    if(max == 2) {
+        //winningCard is value of found pair
         let winningCard = cardValueHist.lastIndexOf(2);
-        cardValueHist.splice(winningCard, 1);
+
+        //filter winningCard out
         cards = cards.filter(thisCard => thisCard.cardValue != winningCard);
-        let len = cards.length;
+        cardValueHist.splice(winningCard, 1);
+        
+        //if found second pair, 
         if(cardValueHist.includes(2)) {
+            //filter second pair value out to find kicker card
             cards = cards.filter(thisCard => thisCard.cardValue != cardValueHist.lastIndexOf(2));
-            let len = cards.length;
+
+            /*
+            return
+            score = two pair,
+            value1 = winningCard,
+            value2 = value of second pair,
+            kicker1 = most value card
+            */
             return [TWO_PAIR, [winningCard, cardValueHist.lastIndexOf(2), cards[0].cardValue]];
         }
+
+        /*
+        if not found second pair, return
+        score = pair,
+        value1 = winningCard,
+        kicker1 = most value card,
+        kicker2 = second most value card,
+        kicker3 = third most value card
+        */
         return [PAIR, [winningCard, cards[0].cardValue, cards[1].cardValue, cards[2].cardValue]];
     }
+
+    //not found any pattern, return high card with 5 kicker cards (return only value)
     cards = cards.splice(0, 5);
     for(let i = 0; i < 5; i++)
         cards[i] = cards[i].cardValue;
     return [HIGH_CARD, cards];
 }
 
-function cardSuitHistDetect (cardSuitHist, cards) {
+/*
+cardSuitHistScoring is used to find highest score from player's card suit histogram
+
+Required parameter
+    - cardSuitHist:     histogram of cards in player hand and community card (table card) represented in array
+                        cardSuitHist[i] means the number of cards in hand or table which thier suit is i
+    - cards:            array of card from player's hand and community card.
+
+This function is used to find card score from card value histogram, then find kicker card value
+
+return parameter pattern is [score, [value1, /value2, /...,]]
+    - score:    number value for score ranking as defined above
+    - valueN:   n-th value of score ranking (n = 1 if straight, n = 1 to 5 if flush)
+
+    example:
+        [8, [8]] means this hand win straight flush with high card 8
+        [5, [11, 7, 6, 5, 2]] mean this hand win flush with jack, 7, 6, 5, 2
+*/
+function cardSuitHistScoring (cardSuitHist, cards) {
+    //find the most repeating card suit
     let max = Math.max(...cardSuitHist);
 
+    //found flush, filter other suits out and continue to find straight flush
     if(max >= 5)
         cards = cards.filter(thisCard => thisCard.cardSuit == cardSuitHist.indexOf(max))
     
-    //เรียงไพ่จากมากไปน้อย
+    //sort card by value in descending order to find straight easier, and find highest set of flush later
     cards.sort(cardSortProperty);
+
+    //seq is longest straight sequence counter
     let seq = 0;
 
+    //finding straight in cards
     for(let i = 0; i < cards.length - 1; i++) {
-        //ข้ามไพ่ซ้ำ
-        while(i < cards.length - 1 && cards[i].cardValue - cards[i + 1].cardValue == 0)
+        //skipping repeating card value (pair will be managed in cardSuitHistScoring)
+        while(i < cards.length - 1 && cards[i].cardValue == cards[i + 1].cardValue)
             i++;
-        //หยุดทันทีหากข้ามไพ่ซ้ำจนไพ่หมด
+        
+        //check and break if reach end of cards
         if(i >= cards.length - 1)
             break;
-        //นับจำนวนไพ่เรียงกัน
+        
+        //if adjacent cards' value is sequential, seq increase
         if(cards[i].cardValue - cards[i + 1].cardValue == 1) {
             seq++;
 
-            //กรณีพิเศษ ถ้าไพ่เรียงกัน 5 4 3 2 และไพ่ที่มีค่ามากที่สุดเป็น Ace
+            /*
+            if there are 4 cards in sequence so far and they are 5 4 3 2, check the first card.
+            If it is ace, found straight with high card 5
+            */
             if(seq == 3 && cards[i].cardValue == 3 && cards[0].cardValue == 14) {
 
-                //ถ้า flush ด้วย คืนค่า straight flush ถ้าไม่ คืนค่า straight เฉย ๆ
+                //if found flush earlier, return straight flush, else return straight, both with high card 5
                 if(max >= 5)
                     return [STRAIGHT_FLUSH, [5]];
+                
                 return [STRAIGHT, [5]];
             }
             
-            //ถ้าไพ่เรียงกัน 5 ใบ
+            //if there 5 cards in sequence, found straight
             if(seq == 4) {
-                //ถ้า flush ด้วย คืนค่า straight flush ถ้าไม่ คืนค่า straight เฉย ๆ
+
+                //if found flush earlier, return straight flush, else return straight, both with high card 3 cards before now
                 if(max >= 5)
                     return [STRAIGHT_FLUSH, [cards[i].cardValue + 3]];
+                
                 return [STRAIGHT, [cards[i].cardValue + 3]];
             }
         }
-        //ถ้าไพ่ไม่เรียงกัน เริ่มนับใหม่
+
+        //if adjacent cards is not sequential, recount seq
         else
             seq = 0;
     }
-    //ถ้า flush คืนค่าไพ่ที่มีดอกตรง และมีค่ามากที่สุด 5 ใบ
+
+    //if found no straight
+
+    //if found flush earlier
     if(max >= 5) {
 
-        //กลับด้านไพ่ เพื่อเรียงไพ่จากมากไปน้อย
+        //return flush with 5 most value card (only value)
         for(let i = 0; i < 5; i++)
             cards[i] = cards[i].cardValue;
         return [FLUSH, cards];
     }
-    //ถ้าไม่เข้าข่ายรูปแบบใด ๆ คืนค่า high card
+
+    //if not found flush earlier, return score = high card with 5 high cards
     cards = cards.splice(0, 5);
+    for(let i = 0; i < 5; i++)
+            cards[i] = cards[i].cardValue;
     return [HIGH_CARD, cards];
 }
 
@@ -193,6 +301,7 @@ function scoreComparison(allPlayerScore) {
             winnerNumber = [number];
             winnerScore = score;
         }
+
         else if(winnerScore[0] == score[0]) {
 
             for(i = 0; i < score[1].length; i++){

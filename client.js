@@ -97,8 +97,8 @@ function updateCardHist(data) {
 
 function scoreCheck() {
     let scoreValue, scoreSuit;
-    scoreValue = cardValueHistDetect(playerData.cardValueHist, tableCard.concat(playerData.hand));
-    scoreSuit = cardSuitHistDetect(playerData.cardSuitHist, tableCard.concat(playerData.hand));
+    scoreValue = cardValueHistScoring(playerData.cardValueHist, tableCard.concat(playerData.hand));
+    scoreSuit = cardSuitHistScoring(playerData.cardSuitHist, tableCard.concat(playerData.hand));
     console.log('score from value ', scoreValue, ' score from suit ', scoreSuit);
     if(scoreValue[0] >= scoreSuit[0])
         return scoreValue;
