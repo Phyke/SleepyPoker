@@ -22,15 +22,15 @@ const zone_winner           = document.getElementById('id_zone_winner');
 let highestBet = 20;
 let tableCard = [];
 let playerCount = 0;
+let playerData;
 
-//joinGame();
 dialog_inputUsername.show();
-socket.on('takeSeat', (playerData) => {onTakeSeat(playerData);});
+socket.on('takeSeat', (playerData) => {TakeSeat(playerData);});
 socket.on('cantJoin', () => {document.write('The game has already started.');});
-socket.on('newPlayerJoined', (allPublicPlayersData) => {newPlayerJoined(allPublicPlayersData);});
+socket.on('updateAllPlayerStatus', (allPublicPlayersData) => {updateAllPlayerStatus(allPublicPlayersData);});
 
-socket.on('setupStartGame', (startGameData) => {setupStartGame(startGameData);});
 socket.on('blindBet', (betValue) => {setBlindBet(betValue)});
+socket.on('setupStartGame', (startGameData) => {setupStartGame(startGameData);});
 socket.on('sendCard', (cardsData) => {cardRecieveAndDisplay(cardsData);});
 
 socket.on('requestAction', () => {requestAction();});
@@ -52,12 +52,7 @@ function submitUsername() {
     }
 }
 
-function joinGame() {
-    const name = prompt('Please enter your name.');
-    socket.emit('joinGame',name);
-}
-
-function onTakeSeat(data) {
+function TakeSeat(data) {
     playerData = data;
     console.log(data.cardValueHist);
     text_playerName.innerHTML = playerData.name;
@@ -121,7 +116,7 @@ function requestAction() {
     zone_action.style.visibility = 'visible';
 }
 
-function newPlayerJoined(allPublicPlayerData) {
+function updateAllPlayerStatus(allPublicPlayerData) {
     playerCount = allPublicPlayerData.length;
     console.log('new player joined');
     while(list_status.rows.length > 2) list_status.deleteRow(2);
