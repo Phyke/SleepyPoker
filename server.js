@@ -96,7 +96,7 @@ io.on('connect', (socket) => {
             gameStarted = true;
 
             setBlindBet();
-            io.sockets.emit('newPlayerJoined', getAllPublicPlayersData());
+            io.sockets.emit('updateAllPlayerStatus', getAllPublicPlayersData());
             io.sockets.emit('setupStartGame', minimumBet);
             sendCardtoPlayers();
             nextTurn();
@@ -195,7 +195,7 @@ function joinGameS(socket,username) {
     let newPlayer = new PLAYER(username,connectCount);
     players.push(newPlayer);
     socket.emit('takeSeat',newPlayer);
-    io.sockets.emit('newPlayerJoined',getAllPublicPlayersData());
+    io.sockets.emit('updateAllPlayerStatus',getAllPublicPlayersData());
 }
 
 function setBlindBet() {
@@ -245,7 +245,7 @@ function updatePlayerData(playerData) {
     console.log(lastPlayerData);
     */
     console.log('notice: Update status to all players...');
-    io.sockets.emit('newPlayerJoined', getAllPublicPlayersData());
+    io.sockets.emit('updateAllPlayerStatus', getAllPublicPlayersData());
     io.sockets.emit('updateHighestBet', highestBet);
     console.log('Passing Turn...');
     console.log('=====================');
@@ -303,7 +303,7 @@ function disconnect(socket) {
     console.log(players);
     console.log(playerSockets);*/
     console.log('A user disconnected from the game.');
-    io.sockets.emit('newPlayerJoined',getAllPublicPlayersData());
+    io.sockets.emit('updateAllPlayerStatus',getAllPublicPlayersData());
     if(players.length==0){
         gameStarted = false;
         connectCount = -1;
@@ -315,7 +315,7 @@ function disconnectForceFold(socket){
     disconnectedPlayerList.push(playerIndex);
     players[playerIndex].lastAction = "Fold";
     console.log('A user disconnected from the game, during the game.');
-    io.sockets.emit('newPlayerJoined',getAllPublicPlayersData());
+    io.sockets.emit('updateAllPlayerStatus',getAllPublicPlayersData());
 }
 
 function clearDisconnectedPlayer(){
