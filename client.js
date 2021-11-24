@@ -26,7 +26,7 @@ let playerData;
 
 dialog_inputUsername.show();
 socket.on('takeSeat', (playerData) => {TakeSeat(playerData);});
-socket.on('cantJoin', () => {document.write('The game has already started.');});
+socket.on('cantJoin', () => {document.write('<h1 style="text-align:center">The game has already started.<h1>');});
 socket.on('updateAllPlayerStatus', (allPublicPlayersData) => {updateAllPlayerStatus(allPublicPlayersData);});
 
 socket.on('blindBet', (betValue) => {setBlindBet(betValue)});
@@ -37,10 +37,11 @@ socket.on('requestAction', () => {requestAction();});
 socket.on('updateHighestBet', (lastPlayerData_highestBet) => {updateHighestBet(lastPlayerData_highestBet);});
 socket.on('addTableCard', (nextTableCard) => {addTableCard(nextTableCard);});
 
-socket.on('gameEnded', () => {gameEnded();});
+socket.on('gameEnded', (hostDisconnectStatus) => {gameEnded(hostDisconnectStatus);});
 socket.on('updateWallet', (wallet) => updateWallet(wallet));
 socket.on('returnWinner', (winnerData) => {showWinner(winnerData);});
 socket.on('restartGame', (allPublicPlayersData) => {restartGameC(allPublicPlayersData);});
+socket.on('hostDisconnected', () => {document.write('<h1 style="text-align:center">Host disconnected<br>Please refresh the page to join a new game.<h1>');});
 
 function submitUsername() {
     if(input_username.value == '') {
@@ -158,8 +159,14 @@ function updateHighestBet(newHighestBet) {
     text_turnStatus.style.backgroundColor = "firebrick";
 }
 
-function gameEnded() {
-    text_turnStatus.innerHTML = 'The game is ended.';
+function gameEnded(hostDisconnectStatus) {
+    if(hostDisconnectStatus == true) {
+        text_turnStatus.innerHTML = 'The game is ended. (Host has left, everyone should leave the game)';
+    }
+    else {
+        text_turnStatus.innerHTML = 'The game is ended.';
+    }
+    
     zone_action.style.visibility = 'hidden';
     let playerScore = scoreCheck();
     if(playerData.lastAction.localeCompare('Fold'))
@@ -293,3 +300,4 @@ input_username.addEventListener("keydown", (event) => {
         button_submitUsername.click();
     }
 });
+
