@@ -69,7 +69,7 @@ io.on('connect', (socket) => {
         console.log('alert: The game has already started.');
         socket.emit('cantJoin');
         socket.disconnect();
-        forceDisconnect = 1;
+        forceDisconnect = true;
         console.log('alert: force disconnect user because join after game started');
     }
     else {
@@ -77,7 +77,7 @@ io.on('connect', (socket) => {
             if(gameStarted){
                 socket.emit('cantJoin');
                 socket.disconnect();
-                forceDisconnect = 1;
+                forceDisconnect = true;
                 console.log('alert: force disconnect user because not input username');
             }
             else {
@@ -147,13 +147,27 @@ io.on('connect', (socket) => {
         });
     
         socket.on('disconnect', () => {
+            let playerIndex = playerSockets.indexOf(socket);
             if(forceDisconnect) forceDisconnect = false;
-            else if(gameStarted){
-                disconnectForceFold(socket);
-                raiseTurn--;
-                if(playerTurn == playerSockets.indexOf(socket)) nextTurn();
+            else if(!gameStarted && playerIndex > -1) { //ใส่ชื่อแล้ว ออกก่อนเริ่มเกม
+                disconnect(1,playerIndex);
             }
-            else disconnect(socket);
+            else if(gameStarted && playerIndex > -1) { //ใส่ชื่อแล้ว ออกระหว่างเกม
+                disconnect(2,playerIndex);
+                raiseTurn--;
+                if(disconnectedPlayerList.length == players.length) {
+                    gameStarted = false;
+                    connectCount = -1;
+                    players = [];
+                    playerSockets = [];
+                    disconnectedPlayerList = [];
+                    restartGame();
+                }
+                else if(playerTurn == playerSockets.indexOf(socket)) nextTurn();
+            }
+            else if(!gameStarted && playerIndex == -1) {
+                disconnect(3,playerIndex);
+            }
         });
     }
 });
@@ -286,36 +300,26 @@ function restartGame() {
     io.sockets.emit('restartGame',getAllPublicPlayersData());
 }
 
-function disconnect(socket) {
-    let spliceTarget = playerSockets.indexOf(socket);
-    /*console.log('============Before players splice============');
-    console.log('splicetarget = ', spliceTarget);
-    console.log(players);
-    console.log(playerSockets);*/
-    players.splice(spliceTarget,1);
-    /*console.log('============After players splice, Before sockets splice============');
-    console.log('splicetarget = ', spliceTarget);
-    console.log(players);
-    console.log(playerSockets);*/
-    playerSockets.splice(spliceTarget,1);
-    /*console.log('============After socketss splice============');
-    console.log('splicetarget = ', spliceTarget);
-    console.log(players);
-    console.log(playerSockets);*/
-    console.log('A user disconnected from the game.');
+function disconnect(mode,playerIndex) {
+    if(mode == 1) { //ใส่ชื่อแล้ว ออกก่อนเกมเริ่ม
+        players.splice(playerIndex,1);
+        playerSockets.splice(playerIndex,1);
+        console.log('A user disconnected from the game.');
+    }
+    else if(mode == 2) { //ใส่ชื่อแล้ว ออกระหว่างเกม
+        disconnectedPlayerList.push(playerIndex);
+        players[playerIndex].lastAction = "Fold";
+        console.log('A user disconnected from the game, during the game.');
+    }
+    else if(mode == 3) { //ยังไม่ใส่ชื่อแล้วกดออก
+        console.log('A user disconnected from the game.');
+    }
+    
     io.sockets.emit('updateAllPlayerStatus',getAllPublicPlayersData());
     if(players.length==0){
         gameStarted = false;
         connectCount = -1;
     }
-}
-
-function disconnectForceFold(socket){
-    let playerIndex = playerSockets.indexOf(socket);
-    disconnectedPlayerList.push(playerIndex);
-    players[playerIndex].lastAction = "Fold";
-    console.log('A user disconnected from the game, during the game.');
-    io.sockets.emit('updateAllPlayerStatus',getAllPublicPlayersData());
 }
 
 function clearDisconnectedPlayer(){

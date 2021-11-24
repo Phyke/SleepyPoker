@@ -206,7 +206,7 @@ function restartGameC(allPublicPlayersData) {
     playerData.status = null;
     playerData.cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     playerData.cardSuitHist = [0, 0, 0, 0, 0];
-    newPlayerJoined(allPublicPlayersData);
+    updateAllPlayerStatus(allPublicPlayersData);
     button_restartGame.style.visibility = 'hidden';
     zone_winner.style.visibility = 'hidden';
     if(playerData.number == 0) button_startGame.style.visibility = 'visible';
