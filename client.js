@@ -25,169 +25,231 @@ let playerCount = 0;
 let playerData;
 
 dialog_inputUsername.show();
-socket.on('takeSeat', (playerData) => {TakeSeat(playerData);});
+
+//all socket and function calling display here
+socket.on('takeSeat', (playerDatafromServer) => {takeSeat(playerDatafromServer);});
 socket.on('cantJoin', () => {document.write('The game has already started.');});
 socket.on('updateAllPlayerStatus', (allPublicPlayersData) => {updateAllPlayerStatus(allPublicPlayersData);});
 
-socket.on('blindBet', (betValue) => {setBlindBet(betValue)});
-socket.on('setupStartGame', (startGameData) => {setupStartGame(startGameData);});
-socket.on('sendCard', (cardsData) => {cardRecieveAndDisplay(cardsData);});
+socket.on('sendCard', (cardsData) => {cardRecieveandDisplay(cardsData);});
 
 socket.on('requestAction', () => {requestAction();});
-socket.on('updateHighestBet', (lastPlayerData_highestBet) => {updateHighestBet(lastPlayerData_highestBet);});
+socket.on('updateHighestBet', (newHighestBet) => {updateHighestBet(newHighestBet);});
 socket.on('addTableCard', (nextTableCard) => {addTableCard(nextTableCard);});
 
 socket.on('gameEnded', () => {gameEnded();});
 socket.on('updateWallet', (wallet) => updateWallet(wallet));
 socket.on('returnWinner', (winnerData) => {showWinner(winnerData);});
-socket.on('restartGame', (allPublicPlayersData) => {restartGameC(allPublicPlayersData);});
+socket.on('restartGame', (allPublicPlayersData) => {restartGame(allPublicPlayersData);});
 
+//socket.on('blindBet', (betValue) => {setBlindBet(betValue)});
+
+//submitUsername send name submitted by player to server
 function submitUsername() {
+    //player must input name
     if(input_username.value == '') {
         alert('Your username cannot be empty.');
     }
+
+    //player submit name, hide name form and send name to server
     else {
         dialog_inputUsername.style.visibility = 'hidden';
         socket.emit('joinGame',input_username.value);
     }
 }
 
-function TakeSeat(data) {
-    playerData = data;
-    console.log(data.cardValueHist);
+//takeSeat retrive player data sent from server and update local player data, then display player on left side of screen
+function takeSeat(playerDatafromServer) {
+    //update player data
+    playerData = playerDatafromServer;
+    
+    //display player data on left side of screen
     text_playerName.innerHTML = playerData.name;
-    text_playerNo.innerHTML = playerData.number + 1; // +1 เพื่อ readability
+    text_playerNo.innerHTML = playerData.number + 1;        // +1 for readability
     text_playerWallet.innerHTML = playerData.wallet;
-    if(playerData.number == 0) button_startGame.style.visibility = 'visible';
+
+    //player is the host of the game, display 'start game' button
+    if(playerData.number == 0)
+        button_startGame.style.visibility = 'visible';
 }
 
+//startGame is activated when player 0 click 'start game' button, send signal to server to start game
 function startGame() {
+    //player number is accepted, must be between 2 - 6 players
     if(playerCount >= 2 && playerCount <= 6) {
+        //send signal to server
         socket.emit('startGame');
+        
+        //hide start game button
         button_startGame.style.visibility = 'hidden';
     }
+
+    //player number is unaccepted, alert player
     else{
         alert('Player count must be between 2 - 6 players');
     }
 }
 
-function cardRecieveAndDisplay(data) {
-    tableCard = data[0];
-    playerData.hand = data[1];
-    console.log(data[0].concat(data[1]));
-    updateCardHist(data[0].concat(data[1]));
-    printCardArray(data[0],zone_table_print);
-    printCardArray(data[1],zone_hand_print);
+//cardRecieveandDisplay recieve table cards and hands card from server
+function cardRecieveandDisplay(cardsData) {
+    //update table card and player's hand
+    tableCard = cardsData[0];
+    playerData.hand = cardsData[1];
+
+    //cards on table and player hand will be used to calculate score, update cards histograms
+    let cardsToCount = cardsData[0].concat(cardsData[1])
+    console.log(cardsToCount);
+    updateCardHist(cardsToCount);
+
+    //display table card and player's hand card on their zone
+    printCardArray(tableCard, zone_table_print);
+    printCardArray(playerData.hand, zone_hand_print);
 }
 
-function addTableCard(data) {
-    tableCard.push(data);
-    printCard(data,zone_table_print,100);
-    console.log(data);
-    updateCardHist([data]);
+//addTableCard uodate table card at the beginning of each round
+function addTableCard(nextTableCard) {
+    //push new card to table cards list
+    tableCard.push(nextTableCard);
+    console.log('notice: client recieve new table card: ', nextTableCard);
+
+    //print new table card in table zone
+    printCard(nextTableCard,zone_table_print, 100);
+
+    //update cards histograms
+    updateCardHist([nextTableCard]);
 }
 
+//updateCardHist will update player's cards histograms from new card sent to player (maybe cards on hand or on table)
 function updateCardHist(data) {
+    //update both histogram by every new cards
     for(let i = 0; i < data.length; i++) {
         playerData.cardValueHist[data[i].cardValue]++;
         playerData.cardSuitHist[data[i].cardSuit]++;
     }
-    console.log(playerData.cardSuitHist, playerData.cardValueHist);
+    console.log('notice: updated card suit histogram: ', playerData.cardSuitHist);
+    console.log('notice: uodated card value histogram: ', playerData.cardValueHist);
 }
 
-function scoreCheck() {
-    let scoreValue, scoreSuit;
-    scoreValue = cardValueHistScoring(playerData.cardValueHist, tableCard.concat(playerData.hand));
-    scoreSuit = cardSuitHistScoring(playerData.cardSuitHist, tableCard.concat(playerData.hand));
-    console.log('score from value ', scoreValue, ' score from suit ', scoreSuit);
-    if(scoreValue[0] >= scoreSuit[0])
-        return scoreValue;
-    return scoreSuit;
-}
-
+/*
+unused function
+//setBlindBet is used to update small blind and big blind player's data on client side
 function setBlindBet(data) {
-    console.log(data);
-    if(data[0] == playerData.number) playerData.lastBet = data[1];
-    //list_status.rows[data[0]+2].cells[2].innerHTML = data[1];
+    playerData.lastBet = data[1];
 }
+*/
+
+//updateHighestBet will be called at begin of every turn to update highest bet made by players, and will send player to waiting state
+function updateHighestBet(newHighestBet) {
+    //update highest bet
+    highestBet = newHighestBet;
+
+    //send player to eaiting state
+    text_turnStatus.innerHTML = "Waiting for other players";
+    text_turnStatus.style.backgroundColor = "firebrick";
+}
+
+//requestAction will display action button to player
 function requestAction() {
+    //update player screen to notice player it's their turn
     text_turnStatus.innerHTML = 'Now is your turn!!!';
     text_turnStatus.style.backgroundColor = 'forestgreen';
+
+    //show action button
     zone_action.style.visibility = 'visible';
 }
 
+//updateAllPlayerStatus will update all public player data in right side table
 function updateAllPlayerStatus(allPublicPlayerData) {
+    //update player count in case of new player join game
     playerCount = allPublicPlayerData.length;
-    console.log('new player joined');
-    while(list_status.rows.length > 2) list_status.deleteRow(2);
+    console.log('notice: player now in game: ', playerCount);
+
+    //delete all player data rows
+    while(list_status.rows.length > 2)
+        list_status.deleteRow(2);
+    
+    //insert all updated players' data into table
     allPublicPlayerData.forEach(playerData => {
         let new_tableRow = list_status.insertRow(list_status.length);
         let new_tableData1 = new_tableRow.insertCell(0);
         let new_tableData2 = new_tableRow.insertCell(1);
         let new_tableData3 = new_tableRow.insertCell(2);
         let new_tableData4 = new_tableRow.insertCell(3);
-        new_tableData1.innerHTML = playerData[0]+1; // plus one for user understanding
+        new_tableData1.innerHTML = playerData[0] + 1; // +1 for readability
         new_tableData2.innerHTML = playerData[1];
         new_tableData3.innerHTML = playerData[2];
         new_tableData4.innerHTML = playerData[3];
     });
 }
 
-function setupStartGame(data) {
-    highestBet = data;
-    text_turnStatus.innerHTML = 'Waiting for other players';
-    text_turnStatus.style.backgroundColor = 'firebrick';
+//scoreCheck calculate player's score from both histograms and compare them, then return the higher score
+function scoreCheck() {
+    //retrive score calculated from cardValueHistScoring and cardSuitHistScoring
+    let scoreValue, scoreSuit;
+    scoreValue = cardValueHistScoring(playerData.cardValueHist, tableCard.concat(playerData.hand));
+    scoreSuit = cardSuitHistScoring(playerData.cardSuitHist, tableCard.concat(playerData.hand));
+
+    console.log('score from value ', scoreValue, ' score from suit ', scoreSuit);
+
+    //return higher score
+    if(scoreValue[0] >= scoreSuit[0])
+        return scoreValue;
+    return scoreSuit;
 }
 
-function updateHighestBet(newHighestBet) {
-    //console.log(data);
-    /*
-    list_status.deleteRow(data[0][0]+2);
-    let new_tableRow = list_status.insertRow(data[0][0]+2);
-    let new_tableData1 = new_tableRow.insertCell(0);
-    let new_tableData2 = new_tableRow.insertCell(1);
-    let new_tableData3 = new_tableRow.insertCell(2);
-    let new_tableData4 = new_tableRow.insertCell(3);
-    new_tableData1.innerHTML = data[0][0]+1; // plus one for user understanding
-    new_tableData2.innerHTML = data[0][1];
-    new_tableData3.innerHTML = data[0][2];
-    new_tableData4.innerHTML = data[0][3];
-    */
-    highestBet = newHighestBet;
-    text_turnStatus.innerHTML = "Waiting for other players";
-    text_turnStatus.style.backgroundColor = "firebrick";
-}
-
+//gameEnded will tell all player that game is ended, calculate player score and send them to server to find winner (if player not folded)
 function gameEnded() {
+    //tell player that the game is ended
     text_turnStatus.innerHTML = 'The game is ended.';
     zone_action.style.visibility = 'hidden';
+
+    //calculate player's score
     let playerScore = scoreCheck();
+
+    //player not folded, send player score to server
     if(playerData.lastAction.localeCompare('Fold'))
-    socket.emit('requestWinner', [playerData.number, playerScore]);
+        socket.emit('requestWinner', [playerData.number, playerScore]);
+
+    //convert playerScore to text and display at the bottom-left side of screen
     text_player_score.innerHTML = scoreToText(playerScore);
-    if(playerData.number == 0) button_restartGame.style.visibility = 'visible';
+
+    //player is host, display restart game button
+    if(playerData.number == 0)
+        button_restartGame.style.visibility = 'visible';
 }
 
+//updateWallet update player's wallet, and display new wallet worth
 function updateWallet(wallet) {
     playerData.wallet = wallet;
     text_playerWallet.innerHTML = wallet;
 }
 
+//showWinner retrieve winnerData from server then display winner data and score at bottom-left side of screen
 function showWinner(winnerData) {
+    //retrieve winnerNumber and winnerScore drom winnerData
     let winnerNumber = winnerData[0], winnerScore = winnerData[1];
+    
+    //convert winnerNumber array to text
     let winnerNumberText = '';
-    winnerNumber.forEach(number => winnerNumberText = winnerNumberText.concat((number + 1).toString() + ', '));
+    winnerNumber.forEach(number =>
+        winnerNumberText = winnerNumberText.concat((number + 1).toString() + ', ')
+    );
     winnerNumberText = winnerNumberText.slice(0, winnerNumberText.length - 2);
+
+    //display winner data and score
     text_winner_playerno.innerHTML = winnerNumberText;
     text_winner_score.innerHTML = scoreToText(winnerScore);
     zone_winner.style.visibility = 'visible';
 }
 
+//requestRestartGame activate when 'restart game' button is clicked, send signal to server
 function requestRestartGame() {
     socket.emit('requestRestartGame');
 }
 
-function restartGameC(allPublicPlayersData) {
+//restartGame activate when server tell all client to restart game
+function restartGame(allPublicPlayersData) {
+    //reset screen
     zone_table_print.innerHTML = '';
     zone_hand_print.innerHTML = '';
     text_player_score.innerHTML = '';
@@ -197,21 +259,26 @@ function restartGameC(allPublicPlayersData) {
     text_turnStatus.innerHTML = 'Welcome';
     text_turnStatus.style.backgroundColor = 'black';
     input_raiseValue.value = '0';
+    zone_winner.style.visibility = 'hidden';
+    button_restartGame.style.visibility = 'hidden';
+    updateAllPlayerStatus(allPublicPlayersData);
+    if(playerData.number == 0)
+        button_startGame.style.visibility = 'visible';
+
+    //reset game data
     tableCard = [];
     highestBet = 20;
-    console.log(allPublicPlayersData);
+
+    //update player data
     playerData.lastBet = 0;
     playerData.lastAction = 'None';
     playerData.hand = [];
     playerData.status = null;
     playerData.cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     playerData.cardSuitHist = [0, 0, 0, 0, 0];
-    updateAllPlayerStatus(allPublicPlayersData);
-    button_restartGame.style.visibility = 'hidden';
-    zone_winner.style.visibility = 'hidden';
-    if(playerData.number == 0) button_startGame.style.visibility = 'visible';
 }
 
+//fold action
 function fold() {
     playerData.lastAction = 'Fold';
     socket.emit('passTurn', playerData);
@@ -219,10 +286,13 @@ function fold() {
     zone_action.style.visibility = 'hidden';
 }
 
+//check action
 function check() {
+    //someone raise, player must call or raise higher
     if(playerData.lastBet < highestBet) {
         alert('You cannot check, you need to call or raise');
     }
+
     else {
         playerData.lastAction = 'Check';
         socket.emit('passTurn', playerData);
@@ -231,15 +301,23 @@ function check() {
     }
 }
 
+//call action
 function call() {
+    //player's money is less than highest bet, must all-in
     if(playerData.wallet < highestBet) {
         alert('You do not have enough money.');
     }
+
+    //player's money is equal to highest bet, auto all-in
+    else if(playerData.wallet == highestBet)
+        allIn();
+    
+    //player already called, cannot call
     else if(playerData.lastBet == highestBet) {
         alert('You need to check (not call).');
     }
-    else if(playerData.wallet == highestBet)
-        allIn();
+
+    //player call
     else {
         playerData.lastAction = 'Call';
         playerData.lastBet = highestBet;
@@ -249,17 +327,25 @@ function call() {
     }
 }
 
+//raise action
 function raise() {
+    //get raise value from html input
     let raiseValue = parseInt(input_raiseValue.value);
-    console.log('Comparing raiseValue = ' + raiseValue + 'vs highestBet = ' + highestBet);
-    if(raiseValue <= highestBet) {
+    console.log('notice: Comparing raiseValue = ' + raiseValue + 'vs highestBet = ' + highestBet);
+
+    //player cannot raise less than highest bet
+    if(raiseValue <= highestBet)
         alert('You must raise more than current highest bet');
-    } 
-    else if(raiseValue > playerData.wallet) {
+    
+    //player cannot raise higher than player's money
+    else if(raiseValue > playerData.wallet)
         alert('You do not have enough money.');
-    }
+
+    //player raise equal to player's money, auto all-in
     else if(playerData.wallet == raiseValue)
         allIn();
+    
+    //player raise
     else {
         playerData.lastAction = 'Raise';
         playerData.lastBet = raiseValue;
@@ -267,10 +353,9 @@ function raise() {
         text_playerLastAction.innerHTML = 'Raise';
         zone_action.style.visibility = 'hidden';
     }
-    raiseValue = 0;
-    console.log(typeof(raiseValue));
 }
 
+//all-in action
 function allIn() {
     playerData.lastAction = 'All-In';
     playerData.lastBet = playerData.wallet;
@@ -279,6 +364,7 @@ function allIn() {
     zone_action.style.visibility = 'hidden';
 }
 
+//three function to activate html element
 function showGameRules() {
     dialog_gameRules.show();
 }

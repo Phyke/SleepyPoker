@@ -116,9 +116,9 @@ io.on('connect', (socket) => {
             highestBet = minimumBet;
             setBlindBet();
 
-            //update player status, and start game on client side
+            //update player status, and set highest bet as minimum bet
             io.sockets.emit('updateAllPlayerStatus', getAllPublicPlayersData());
-            io.sockets.emit('setupStartGame', minimumBet);
+            io.sockets.emit('updateHighestBet', minimumBet);
 
             //draw table cards and hands card, then send cards to display on client side
             sendCardtoPlayers();
@@ -283,14 +283,14 @@ function setBlindBet() {
     console.log('notice: set small blind for player ', playerTurn);
 
     players[playerTurn].lastBet = minimumBet / 2;
-    io.sockets.emit('blindBet', [players[playerTurn].number, minimumBet / 2]);
+    //playerSocket[playerTurn].emit('blindBet', minimumBet / 2);
 
     //player 2 take big blind (equal to minimum bet)
     playerTurn = (playerTurn + 1) % players.length;
     console.log('notice: set big blind for player ', playerTurn);
 
     players[playerTurn].lastBet = minimumBet;
-    io.sockets.emit('blindBet', [players[playerTurn].number, minimumBet]);
+    //playerSocket[playerTurn].emit('blindBet', minimumBet);
 }
 
 //sendCardtoPlayers draw cards for table and players' hands at the start of the game
