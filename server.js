@@ -189,30 +189,46 @@ io.on('connect', (socket) => {
 
         //player disconnect, need special method to continue game
         socket.on('disconnect', () => {
+            //detect disconnected player
             let playerIndex = playerSockets.indexOf(socket);
-            if(!gameStarted && playerIndex > -1) { //ใส่ชื่อแล้ว ออกก่อนเริ่มเกม
-                if(players[playerIndex].number == 0) { //host disconnect before game start
+
+            //game is not started, but disconnected player submitted name
+            if(!gameStarted && playerIndex > -1) {
+
+                //disconnected player is host, force players to leave and reset game
+                if(players[playerIndex].number == 0) {
                     io.sockets.emit("hostDisconnected");
                     resetGame();
                 }
+
+                //disconnect player isn't host, continue to manage disconnected player
                 else {
-                    disconnect(1,playerIndex);
+                    disconnect(1, playerIndex);
                 }
             }
-            else if(gameStarted && playerIndex > -1) { //ใส่ชื่อแล้ว ออกระหว่างเกม
-                if(players[playerIndex].number == 0) { //host disconnect during the game
+
+            //game is started, but disconnected player submitted name
+            else if(gameStarted && playerIndex > -1) {
+                //disconnected player is host, tell players to leave when game ended
+                if(players[playerIndex].number == 0)
                     hostDisconnectStatus = true;
-                }
-                disconnect(2,playerIndex);
+
+                //continue to manage disconnected player
+                disconnect(2, playerIndex);
                 raiseTurn--;
-                if(disconnectedPlayerList.length == players.length) {
+
+                //all player disconnected, reset game
+                if(disconnectedPlayerList.length == players.length)
                     resetGame();
-                }
-                else if(playerTurn == playerSockets.indexOf(socket)) nextTurn();
+                
+                //now is during disconnected player, call nextTurn
+                else if(playerTurn == playerSockets.indexOf(socket))
+                    nextTurn();
             }
-            else if(!gameStarted && playerIndex == -1) { //ยังไม่ใส่ชื่อ ออกก่อนเริ่มเกม
+
+            //game is not started, and disconnected player didn't submit name, continue to manage disconnected player
+            else if(!gameStarted && playerIndex == -1)
                 disconnect(3,playerIndex);
-            }
         });
     }
 });
@@ -400,35 +416,53 @@ function restartGame() {
     io.sockets.emit('restartGame', getAllPublicPlayersData());
 }
 
-function disconnect(mode,playerIndex) {
-    if(mode == 1) { //ใส่ชื่อแล้ว ออกก่อนเกมเริ่ม
-        players.splice(playerIndex,1);
-        playerSockets.splice(playerIndex,1);
-        console.log('A user disconnected from the game.');
+/*
+disconnect will manage disconnected player data according to mode called
+which are:
+    - mode 1: name submitted, game isn't started
+    - mode 2: name subbmited, game is started
+    - mode 3: name isn't submitted
+*/
+function disconnect(mode, playerIndex) {
+    //mode 1, delete player data from players list
+    if(mode == 1) {
+        players.splice(playerIndex, 1);
+        playerSockets.splice(playerIndex, 1);
+        console.log('alert: A player disconnected from the game.');
     }
-    else if(mode == 2) { //ใส่ชื่อแล้ว ออกระหว่างเกม
-        disconnectedPlayerList.push(playerIndex);
+
+    //mode 2
+    else if(mode == 2) {
+        //force player to fold
         players[playerIndex].lastAction = "Fold";
-        console.log('A user disconnected from the game, during the game.');
+
+        //push player into disconnected players list, ready to delete player data when game ended
+        disconnectedPlayerList.push(playerIndex);
+        console.log('alert: A player disconnected during the game.');
     }
-    else if(mode == 3) { //ยังไม่ใส่ชื่อแล้วกดออก
-        console.log('A user disconnected from the game.');
-    }
+
+    //mode 3, do nothing since player data isn't inserted
+    else if(mode == 3)
+        console.log('alert: A non-player disconnected from the game.');
     
-    io.sockets.emit('updateAllPlayerStatus',getAllPublicPlayersData());
-    if(players.length==0){
+    //update player data at client side
+    io.sockets.emit('updateAllPlayerStatus', getAllPublicPlayersData());
+
+    //player data is empty, reset game
+    if(players.length == 0)
         resetGame();
-    }
 }
 
+//clearDisconnectedPlayer delete disconnected players' data from player list, ready for next round of game. then clear disconnected players list
 function clearDisconnectedPlayer(){
     disconnectedPlayerList.forEach(playerIndex => {
-        players.splice(playerIndex,1);
-        playerSockets.splice(playerIndex,1);
+        players.splice(playerIndex, 1);
+        playerSockets.splice(playerIndex, 1);
     });
     disconnectedPlayerList = [];
 }
 
+//resetGame reset game when all player left
 function resetGame(){
     gameStarted = false;
     connectCount = -1;
