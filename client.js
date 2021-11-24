@@ -76,8 +76,8 @@ function cardRecieveAndDisplay(data) {
     playerData.hand = data[1];
     console.log(data[0].concat(data[1]));
     updateCardHist(data[0].concat(data[1]));
-    printCardArray(data[0],zone_table_print,100);
-    printCardArray(data[1],zone_hand_print,100);
+    printCardArray(data[0],zone_table_print);
+    printCardArray(data[1],zone_hand_print);
 }
 
 function addTableCard(data) {

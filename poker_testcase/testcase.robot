@@ -5,6 +5,44 @@ Library     Selenium2Library
 ${url}  http://localhost:5000/
 ${browser}  chrome
 
+***comments***
+--PASS--
+Test: have players more than 6 (use enter to input name)
+    Open browser  ${url}  ${browser}
+    Input Text  id=id_input_username  player1
+    Press Keys  //*[contains(text(),'Submit')]  Enter 
+    Set Window Position  960  0
+    Set Window Size  960  540
+    Sleep  1s
+    Open browser  ${url}  ${browser}
+    Input Text  id=id_input_username  player2
+    Press Keys  //*[contains(text(),'Submit')]  Enter
+    Open browser  ${url}  ${browser}
+    Input Text  id=id_input_username  player3
+    Press Keys  //*[contains(text(),'Submit')]  Enter
+    Open browser  ${url}  ${browser}
+    Input Text  id=id_input_username  player4
+    Press Keys  //*[contains(text(),'Submit')]  Enter 
+Test: have players more than 6 (use click on "Submit" button to input name)
+    Open browser  ${url}  ${browser}
+    Input Text  id=id_input_username  player5
+    Click element  id=id_button_submitUsername
+    Open browser  ${url}  ${browser}
+    Input Text  id=id_input_username  player6
+    Click element  id=id_button_submitUsername
+    Open browser  ${url}  ${browser}
+    Input Text  id=id_input_username  player7
+    Click element  id=id_button_submitUsername
+    Open browser  ${url}  ${browser}
+    Input Text  id=id_input_username  player8
+    Click element  id=id_button_submitUsername
+    Switch browser  1
+    Click element  id=id_button_startGame
+    Alert Should be present  Player count must be between 2 - 6 players
+    Sleep  5s
+    Close All Browsers
+***comments***
+--Wait for test--
 ***Test Cases***
 Test: enter name, open gamerules
     Open browser  ${url}  ${browser}
@@ -36,39 +74,27 @@ Test: player1,2 Call
     Switch browser  1
     Click element  id=id_button_call
     Alert Should be present  You need to check (not call).
-***comments***    
-Test: call
+    Click element  id=id_button_check
+Test: player2 Raise, player1 Call
+    Switch browser  2
+    Input Text  id=id_input_raiseValue  150
+    Click element  id=id_button_raise
+    Switch browser  1
     Click element  id=id_button_call
-    Alert Should be present  You need to check (not call).
-Test: check
-    Click element  id=id_button_check
-    Page Should Contain  Player 0 : Check
-    Click element  id=id_button_check
-    Page Should Contain  Player 0 : Check
-    Click element  id=id_button_check
-    Page Should Contain  The game is ended.
-    Close browser
-Test: fold
-    Open browser  ${url}  ${browser}
-    Input Text  id=id_input_username  user0
-    Click element  id=id_button_submitUsername
-    Element Should Contain  user0
-    Click element  id=id_button_startGame
+Test: player2 All in, player1 Fold
+    Switch browser  2
+    Click element  id=id_button_allIn
+    Switch browser  1
     Click element  id=id_button_fold
-    Page Should Contain  Player 0 : Fold
-    Close browser
-Test: All-in
-    Open browser  ${url}  ${browser}
-    Input Text  id=id_input_username  user0
-    Click element  id=id_button_submitUsername
-    Page Should Contain  Your name: user0
-    Click element  id=id_button_allin
-    Page Should Contain 
-
+    Page Should Contain  The game is ended.
+Test: Restart game, showing "Start game" button
+    click element  id=id_button_restartGame
+    sleep  1s
+    Element Should Contain   id=id_button_startGame  Start Game
 ***comments***
 This test case test success scenario: game can end and show the winner 
-by using basic method(only call and check)//all pass    
-
+by using basic method(only call and check)   
+--PASS--
 Initial all user and position
     Open browser  ${url}  ${browser}
     Input Text  id=id_input_username  player1
@@ -132,4 +158,3 @@ Test Case-Success: Game ended -> close browser,showing restart game button
     Switch browser  4
     Page Should Contain  The game is ended.
     Close All Browsers
-
