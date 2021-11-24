@@ -40,7 +40,7 @@ socket.on('addTableCard', (nextTableCard) => {addTableCard(nextTableCard);});
 socket.on('gameEnded', (hostDisconnectStatus) => {gameEnded(hostDisconnectStatus);});
 socket.on('updateWallet', (wallet) => updateWallet(wallet));
 socket.on('returnWinner', (winnerData) => {showWinner(winnerData);});
-socket.on('restartGame', (allPublicPlayersData) => {restartGameC(allPublicPlayersData);});
+socket.on('restartGame', (allPublicPlayersData) => {restartGame(allPublicPlayersData);});
 
 socket.on('hostDisconnected', () => {document.write('<h1 style="text-align:center">Host disconnected<br>Please refresh the page to join a new game.<h1>');});
 
