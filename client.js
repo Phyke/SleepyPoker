@@ -28,7 +28,7 @@ dialog_inputUsername.show();
 
 //all socket and function calling display here
 socket.on('takeSeat', (playerDatafromServer) => {takeSeat(playerDatafromServer);});
-socket.on('cantJoin', () => {document.write('The game has already started.');});
+socket.on('cantJoin', () => {document.write('<h1 style="text-align:center">The game has already started.<h1>');});
 socket.on('updateAllPlayerStatus', (allPublicPlayersData) => {updateAllPlayerStatus(allPublicPlayersData);});
 
 socket.on('sendCard', (cardsData) => {cardRecieveandDisplay(cardsData);});
@@ -37,10 +37,12 @@ socket.on('requestAction', () => {requestAction();});
 socket.on('updateHighestBet', (newHighestBet) => {updateHighestBet(newHighestBet);});
 socket.on('addTableCard', (nextTableCard) => {addTableCard(nextTableCard);});
 
-socket.on('gameEnded', () => {gameEnded();});
+socket.on('gameEnded', (hostDisconnectStatus) => {gameEnded(hostDisconnectStatus);});
 socket.on('updateWallet', (wallet) => updateWallet(wallet));
 socket.on('returnWinner', (winnerData) => {showWinner(winnerData);});
-socket.on('restartGame', (allPublicPlayersData) => {restartGame(allPublicPlayersData);});
+socket.on('restartGame', (allPublicPlayersData) => {restartGameC(allPublicPlayersData);});
+
+socket.on('hostDisconnected', () => {document.write('<h1 style="text-align:center">Host disconnected<br>Please refresh the page to join a new game.<h1>');});
 
 //socket.on('blindBet', (betValue) => {setBlindBet(betValue)});
 
@@ -198,9 +200,15 @@ function scoreCheck() {
 }
 
 //gameEnded will tell all player that game is ended, calculate player score and send them to server to find winner (if player not folded)
-function gameEnded() {
+function gameEnded(hostDisconnectStatus) {
+    //host left, game ended. tell player to leave
+    if(hostDisconnectStatus == true)
+        text_turnStatus.innerHTML = 'The game is ended. (Host has left, everyone should leave the game)';
+    
     //tell player that the game is ended
-    text_turnStatus.innerHTML = 'The game is ended.';
+    else
+        text_turnStatus.innerHTML = 'The game is ended.';
+    
     zone_action.style.visibility = 'hidden';
 
     //calculate player's score
@@ -379,3 +387,4 @@ input_username.addEventListener("keydown", (event) => {
         button_submitUsername.click();
     }
 });
+

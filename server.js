@@ -42,10 +42,10 @@ let playerTurn = 0;
 
 let round = 0;
 
-let forceDisconnect = false;
 let connectCount = -1;
 
 let disconnectedPlayerList = [];
+let hostDisconnectStatus = false;
 //let timeOut;
 //const MAX_WAITING = 5000;
 
@@ -75,7 +75,6 @@ io.on('connect', (socket) => {
 
         //disconnect player from socket
         socket.disconnect();
-        forceDisconnect = true;
         console.log('alert: force disconnect user because join after game started');
     }
 
@@ -92,7 +91,6 @@ io.on('connect', (socket) => {
 
                 //disconnect player from socket
                 socket.disconnect();
-                forceDisconnect = true;
                 console.log('alert: force disconnect user because not input username');
             }
 
@@ -149,10 +147,11 @@ io.on('connect', (socket) => {
                 round++;
 
                 //reached round 4, game end
-                if(round == 3) io.sockets.emit('gameEnded');
+                if(round == 3)
+                    io.sockets.emit('gameEnded', hostDisconnectStatus);
 
                 //start new round
-                else{
+                else {
                     //turn count = number of active player
                     raiseTurn = activePlayer;
                     console.log('notice: new round: ', round, ' raiseTurn: ', raiseTurn);
@@ -191,24 +190,27 @@ io.on('connect', (socket) => {
         //player disconnect, need special method to continue game
         socket.on('disconnect', () => {
             let playerIndex = playerSockets.indexOf(socket);
-            if(forceDisconnect) forceDisconnect = false;
-            else if(!gameStarted && playerIndex > -1) { //ใส่ชื่อแล้ว ออกก่อนเริ่มเกม
-                disconnect(1,playerIndex);
+            if(!gameStarted && playerIndex > -1) { //ใส่ชื่อแล้ว ออกก่อนเริ่มเกม
+                if(players[playerIndex].number == 0) { //host disconnect before game start
+                    io.sockets.emit("hostDisconnected");
+                    resetGame();
+                }
+                else {
+                    disconnect(1,playerIndex);
+                }
             }
             else if(gameStarted && playerIndex > -1) { //ใส่ชื่อแล้ว ออกระหว่างเกม
+                if(players[playerIndex].number == 0) { //host disconnect during the game
+                    hostDisconnectStatus = true;
+                }
                 disconnect(2,playerIndex);
                 raiseTurn--;
                 if(disconnectedPlayerList.length == players.length) {
-                    gameStarted = false;
-                    connectCount = -1;
-                    players = [];
-                    playerSockets = [];
-                    disconnectedPlayerList = [];
-                    restartGame();
+                    resetGame();
                 }
                 else if(playerTurn == playerSockets.indexOf(socket)) nextTurn();
             }
-            else if(!gameStarted && playerIndex == -1) {
+            else if(!gameStarted && playerIndex == -1) { //ยังไม่ใส่ชื่อ ออกก่อนเริ่มเกม
                 disconnect(3,playerIndex);
             }
         });
@@ -415,8 +417,7 @@ function disconnect(mode,playerIndex) {
     
     io.sockets.emit('updateAllPlayerStatus',getAllPublicPlayersData());
     if(players.length==0){
-        gameStarted = false;
-        connectCount = -1;
+        resetGame();
     }
 }
 
@@ -426,4 +427,13 @@ function clearDisconnectedPlayer(){
         playerSockets.splice(playerIndex,1);
     });
     disconnectedPlayerList = [];
+}
+
+function resetGame(){
+    gameStarted = false;
+    connectCount = -1;
+    players = [];
+    playerSockets = [];
+    disconnectedPlayerList = [];
+    hostDisconnectStatus = false;
 }
