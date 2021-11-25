@@ -7,8 +7,8 @@ ${browser}  chrome
 
 ***comments***
 This test case test main success scenario: game can end and show the winner 
-by using basic method(only call and check).   
---PASS--
+by using basic ways to ending game(only all in).   
+***Test cases***
 Initial all user and desktop position
     Open browser  ${url}  ${browser}
     Input Text  id=id_input_username  player1
@@ -33,49 +33,37 @@ Initial all user and desktop position
 Test Case-Main Success: Startgame
     Switch browser  1
     Click element  id=id_button_startGame  
-Test Main Success Case: Call
+Test Main Success Case: All players all in
     switch browser  4
-    Click element  id=id_button_call
+    Click element  id=id_button_allIn
+    Sleep  2s
     switch browser  1
-    Click element  id=id_button_call
+    Click element  id=id_button_allIn
+    Sleep  2s
     switch browser  2
-    Click element  id=id_button_call
-Test Main Success Case: Check
+    Click element  id=id_button_allIn
+    Sleep  2s
     Switch browser  3
-    Click element  id=id_button_check
-    Switch browser  4
-    Click element  id=id_button_check
-    Switch browser  1
-    Click element  id=id_button_check
+    Click element  id=id_button_allIn
+    Sleep  2s
+Test Main Success Case: Game ended -> click on restart game button, close browser
+    Page Should Contain  The game is ended.
     Switch browser  2
-    Click element  id=id_button_check
-    Switch browser  3
-    Click element  id=id_button_check
-Test Main Success Case: Another Check
+    Page Should Contain  The game is ended.
     Switch browser  4
-    Click element  id=id_button_check
-    Switch browser  1
-    Click element  id=id_button_check
-    Switch browser  2
-    Click element  id=id_button_check
-    Switch browser  3
-    Click element  id=id_button_check
-Test Main Success Case: Game ended -> close browser,showing restart game button
+    Page Should Contain  The game is ended.
     Switch browser  1
     Page Should Contain  The game is ended.
+    Sleep  1s
     Element Should Contain   id=id_button_restartGame  Restart Game
-    Sleep  5s
-    Switch browser  2
-    Page Should Contain  The game is ended.
-    Switch browser  3
-    Page Should Contain  The game is ended.
-    Switch browser  4
-    Page Should Contain  The game is ended.
+    Click element  id=id_button_restartGame
+    Element Should Contain   id=id_button_startGame  Start Game
+    Sleep  1s
     Close All Browsers
 
 ***comments***
 This test case test function and action of the system.
-***Test Cases***
+***Test cases***
 Test Fucntion: enter name, open gamerules
     Open browser  ${url}  ${browser}
     Input Text  id=id_input_username  player1
@@ -101,11 +89,6 @@ Test Function: startgame with 2 players
     Switch browser  1
     Click element  id=id_button_startGame
     Element Should Contain  id=id_text_playerWallet  1000
-Test Fucntion: player can't join game when it's started
-    Open browser  ${url}  ${browser}
-    Page Should Contain  The game has already started.
-    Sleep  2s
-    Close Browser
 Test Action: player2 Check
     Switch browser  2
     Element Should Contain  id=id_text_playerWallet  1000
@@ -157,18 +140,36 @@ Test Function: Restart game, showing "Start game" button
     sleep  1s
     Element Should Contain   id=id_button_startGame  Start Game
     sleep  1s
-Test Function: all players disconnected when game start, and new player come in//in progress
+Test Function: Check that game can start again
     Click element  id=id_button_startGame
-    Sleep  2s
-    Close All Browsers
-    Sleep  2s
+    sleep  1s
+    Page Should Contain  Waiting for other players
+    sleep  2s
+    Close browser
+Test Function: Show host disconnected when
+    Switch browser  2
+    Page Should Contain  Host disconnected
+    sleep  1s
+    Close browser
+Test Function: Host disconnected between game.
     Open browser  ${url}  ${browser}
     Input Text  id=id_input_username  player1
-    Click element  id=id_button_submitUsername
-    Page Should Contain  Start Game
-    Close Browser
-***comments***
---PASS--
+    Press Keys  //*[contains(text(),'Submit')]  Enter
+    Open browser  ${url}  ${browser}
+    Input Text  id=id_input_username  player2
+    Press Keys  //*[contains(text(),'Submit')]  Enter
+    Set Window Position  960  0
+    Sleep  1s
+    Switch browser  1
+    Click element  id=id_button_startGame
+    Sleep  2s
+    Close browser
+    Switch browser  2
+    Click element  id=id_button_allIn
+    Page Should Contain  The game is ended. (Host has left, everyone should leave the game)
+    Sleep  2s
+    Close browser
+***Test cases***
 Test Function: have players more than 6 (use enter to input name)
     Open browser  ${url}  ${browser}
     Input Text  id=id_input_username  player1
