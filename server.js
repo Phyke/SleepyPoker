@@ -301,14 +301,14 @@ function setBlindBet() {
     console.log('notice: set small blind for player ', playerTurn);
 
     players[playerTurn].lastBet = minimumBet / 2;
-    playerSockets[playerTurn].emit('setBlindBet', minimumBet / 2);
+    playerSockets[playerTurn].emit('updatePlayerData', players[playerTurn]);
 
     //player 2 take big blind (equal to minimum bet)
     playerTurn = (playerTurn + 1) % players.length;
     console.log('notice: set big blind for player ', playerTurn);
 
     players[playerTurn].lastBet = minimumBet;
-    playerSockets[playerTurn].emit('setBlindBet', minimumBet);
+    playerSockets[playerTurn].emit('updatePlayerData', players[playerTurn]);
 }
 
 //sendCardtoPlayers draw cards for table and players' hands at the start of the game
@@ -402,15 +402,30 @@ function restartGame() {
     //game ended
     gameStarted = false;
 
-    //reset player data in server
-    players.forEach(playerData => {
-        playerData.lastBet = 0;
-        playerData.lastAction = 'None';
-        playerData.hand = [];
-        playerData.status = null;
-        playerData.cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        playerData.cardSuitHist = [0, 0, 0, 0, 0];
-    });
+    //kick player who has zero wallet
+    for(let i = 0; i < players.length; i++) {
+        if(players[i].wallet == 0) {
+            playerSockets[i].emit('kickEmptyWallet');
+            players.splice(i, 1);
+            playerSockets.splice(i, 1);
+            i--;
+        }
+    }
+
+    //reset player data in server and update in client
+    for(let i = 0; i < players.length; i++) {
+        players[i].number = i;
+        players[i].lastBet = 0;
+        players[i].lastAction = 'None';
+        players[i].hand = [];
+        players[i].status = null;
+        players[i].cardValueHist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        players[i].cardSuitHist = [0, 0, 0, 0, 0];
+        playerSockets[i].emit('updatePlayerData', players[i]);
+    }
+
+    //reset next join player number
+    connectCount = players.length - 1;
 
     //send updated public players' data to display on client side
     io.sockets.emit('restartGame', getAllPublicPlayersData());

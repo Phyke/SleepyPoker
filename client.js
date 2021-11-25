@@ -31,7 +31,7 @@ socket.on('takeSeat', (playerDatafromServer) => {takeSeat(playerDatafromServer);
 socket.on('cantJoin', () => {document.write('<h1 style="text-align:center">The game has already started.<h1>');});
 socket.on('updateAllPlayerStatus', (allPublicPlayersData) => {updateAllPlayerStatus(allPublicPlayersData);});
 
-socket.on('setBlindBet', (betValue) => {setBlindBet(betValue)});
+socket.on('updatePlayerData', (playerDataTemp) => {updatePlayerData(playerDataTemp)});
 socket.on('sendCard', (cardsData) => {cardRecieveandDisplay(cardsData);});
 
 socket.on('requestAction', () => {requestAction();});
@@ -39,9 +39,10 @@ socket.on('updateHighestBet', (newHighestBet) => {updateHighestBet(newHighestBet
 socket.on('addTableCard', (nextTableCard) => {addTableCard(nextTableCard);});
 
 socket.on('gameEnded', (hostDisconnectStatus) => {gameEnded(hostDisconnectStatus);});
-socket.on('updateWallet', (wallet) => updateWallet(wallet));
+socket.on('updateWallet', (wallet) => {updateWallet(wallet);});
 socket.on('returnWinner', (winnerData) => {showWinner(winnerData);});
 socket.on('restartGame', (allPublicPlayersData) => {restartGame(allPublicPlayersData);});
+socket.on('kickEmptyWallet', () => {document.write('<h1 style="text-align:center">You have been kicked becuase you don\'t have any money left.<br>Please refresh the page to join a new game.<h1>');});
 
 socket.on('hostDisconnected', () => {document.write('<h1 style="text-align:center">Host disconnected<br>Please refresh the page to join a new game.<h1>');});
 
@@ -131,9 +132,10 @@ function updateCardHist(data) {
     console.log('notice: uodated card value histogram: ', playerData.cardValueHist);
 }
 
-//setBlindBet is used to update small blind and big blind player's data on client side
-function setBlindBet(betValue) {
-    playerData.lastBet = betValue;
+//updatePlayerData is used to update player's data on client side
+function updatePlayerData(playerDataTemp) {
+    playerData = playerDataTemp;
+    text_playerNo.innerHTML = playerData.number + 1;
 }
 
 //updateHighestBet will be called at begin of every turn to update highest bet made by players, and will send player to waiting state
