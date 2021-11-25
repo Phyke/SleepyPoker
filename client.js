@@ -31,6 +31,7 @@ socket.on('takeSeat', (playerDatafromServer) => {takeSeat(playerDatafromServer);
 socket.on('cantJoin', () => {document.write('<h1 style="text-align:center">The game has already started.<h1>');});
 socket.on('updateAllPlayerStatus', (allPublicPlayersData) => {updateAllPlayerStatus(allPublicPlayersData);});
 
+socket.on('setBlindBet', (betValue) => {setBlindBet(betValue)});
 socket.on('sendCard', (cardsData) => {cardRecieveandDisplay(cardsData);});
 
 socket.on('requestAction', () => {requestAction();});
@@ -43,8 +44,6 @@ socket.on('returnWinner', (winnerData) => {showWinner(winnerData);});
 socket.on('restartGame', (allPublicPlayersData) => {restartGame(allPublicPlayersData);});
 
 socket.on('hostDisconnected', () => {document.write('<h1 style="text-align:center">Host disconnected<br>Please refresh the page to join a new game.<h1>');});
-
-//socket.on('blindBet', (betValue) => {setBlindBet(betValue)});
 
 //submitUsername send name submitted by player to server
 function submitUsername() {
@@ -132,13 +131,10 @@ function updateCardHist(data) {
     console.log('notice: uodated card value histogram: ', playerData.cardValueHist);
 }
 
-/*
-unused function
 //setBlindBet is used to update small blind and big blind player's data on client side
-function setBlindBet(data) {
-    playerData.lastBet = data[1];
+function setBlindBet(betValue) {
+    playerData.lastBet = betValue;
 }
-*/
 
 //updateHighestBet will be called at begin of every turn to update highest bet made by players, and will send player to waiting state
 function updateHighestBet(newHighestBet) {

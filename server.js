@@ -301,14 +301,14 @@ function setBlindBet() {
     console.log('notice: set small blind for player ', playerTurn);
 
     players[playerTurn].lastBet = minimumBet / 2;
-    //playerSocket[playerTurn].emit('blindBet', minimumBet / 2);
+    playerSockets[playerTurn].emit('setBlindBet', minimumBet / 2);
 
     //player 2 take big blind (equal to minimum bet)
     playerTurn = (playerTurn + 1) % players.length;
     console.log('notice: set big blind for player ', playerTurn);
 
     players[playerTurn].lastBet = minimumBet;
-    //playerSocket[playerTurn].emit('blindBet', minimumBet);
+    playerSockets[playerTurn].emit('setBlindBet', minimumBet);
 }
 
 //sendCardtoPlayers draw cards for table and players' hands at the start of the game
