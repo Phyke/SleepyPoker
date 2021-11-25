@@ -106,6 +106,10 @@ function cardRecieveandDisplay(cardsData) {
     //display table card and player's hand card on their zone
     printCardArray(tableCard, zone_table_print);
     printCardArray(playerData.hand, zone_hand_print);
+
+    //display current score
+    text_player_score.innerHTML = scoreToText(scoreCheck());
+    zone_winner.style.visibility = 'visible';
 }
 
 //addTableCard uodate table card at the beginning of each round
@@ -119,17 +123,20 @@ function addTableCard(nextTableCard) {
 
     //update cards histograms
     updateCardHist([nextTableCard]);
+
+    //display current score
+    text_player_score.innerHTML = scoreToText(scoreCheck());
 }
 
 //updateCardHist will update player's cards histograms from new card sent to player (maybe cards on hand or on table)
 function updateCardHist(data) {
     //update both histogram by every new cards
     for(let i = 0; i < data.length; i++) {
-        playerData.cardValueHist[data[i].cardValue]++;
-        playerData.cardSuitHist[data[i].cardSuit]++;
+        playerData.cardValueHist[data[i].cardValue] = playerData.cardValueHist[data[i].cardValue] + 1;
+        playerData.cardSuitHist[data[i].cardSuit] = playerData.cardSuitHist[data[i].cardSuit] + 1;
     }
     console.log('notice: updated card suit histogram: ', playerData.cardSuitHist);
-    console.log('notice: uodated card value histogram: ', playerData.cardValueHist);
+    console.log('notice: updated card value histogram: ', playerData.cardValueHist);
 }
 
 //updatePlayerData is used to update player's data on client side
@@ -245,7 +252,6 @@ function showWinner(winnerData) {
     //display winner data and score
     text_winner_playerno.innerHTML = winnerNumberText;
     text_winner_score.innerHTML = scoreToText(winnerScore);
-    zone_winner.style.visibility = 'visible';
 }
 
 //requestRestartGame activate when 'restart game' button is clicked, send signal to server

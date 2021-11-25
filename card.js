@@ -92,9 +92,10 @@ return parameter pattern is [score, [value1, /value2, /..., /kicker1, /kicker2, 
 function cardValueHistScoring (cardValueHist, cards) {
     //winningCard is value of card with highest score
     let winningCard;
+    let cardValueHistTemp = cardValueHist.slice();
 
     //find the most repeating card value
-    let max = Math.max(...cardValueHist);
+    let max = Math.max(...cardValueHistTemp);
 
     //sort card by value in descending order to find kicker card later
     cards.sort(cardSortProperty);
@@ -105,7 +106,7 @@ function cardValueHistScoring (cardValueHist, cards) {
     if(max >= 4) {
     
         //winningCard is most value that have 4 repeating cards
-        winningCard = cardValueHist.lastIndexOf(max);
+        winningCard = cardValueHistTemp.lastIndexOf(max);
 
         //find kicker card by filter winningCard out
         cards = cards.filter(thisCard => thisCard.cardValue != winningCard);
@@ -122,14 +123,14 @@ function cardValueHistScoring (cardValueHist, cards) {
     //3 cards repeating, continue to find fullhouse or three of a kind
     if(max == 3) {
         //winningCard is most value that have 3 repeating cards
-        winningCard = cardValueHist.lastIndexOf(3);
+        winningCard = cardValueHistTemp.lastIndexOf(3);
 
         //filter winningCard out
         cards = cards.filter(thisCard => thisCard.cardValue != winningCard);
-        cardValueHist.splice(winningCard, 1);
+        cardValueHistTemp.splice(winningCard, 1);
 
         //find next most repeating card
-        max = Math.max(...cardValueHist);
+        max = Math.max(...cardValueHistTemp);
 
         /*
         if found any pair, return
@@ -138,7 +139,7 @@ function cardValueHistScoring (cardValueHist, cards) {
         value2 = value of found pair
         */
         if(max >= 2)
-            return [FULL_HOUSE, [winningCard, cardValueHist.lastIndexOf(max)]];
+            return [FULL_HOUSE, [winningCard, cardValueHistTemp.lastIndexOf(max)]];
 
         /*
         if not found any pair, return
@@ -153,16 +154,16 @@ function cardValueHistScoring (cardValueHist, cards) {
     //2 cards repeating, continue to find two pair or return pair
     if(max == 2) {
         //winningCard is value of found pair
-        let winningCard = cardValueHist.lastIndexOf(2);
+        let winningCard = cardValueHistTemp.lastIndexOf(2);
 
         //filter winningCard out
         cards = cards.filter(thisCard => thisCard.cardValue != winningCard);
-        cardValueHist.splice(winningCard, 1);
+        cardValueHistTemp.splice(winningCard, 1);
         
         //found second pair, 
-        if(cardValueHist.includes(2)) {
+        if(cardValueHistTemp.includes(2)) {
             //filter second pair value out to find kicker card
-            cards = cards.filter(thisCard => thisCard.cardValue != cardValueHist.lastIndexOf(2));
+            cards = cards.filter(thisCard => thisCard.cardValue != cardValueHistTemp.lastIndexOf(2));
 
             /*
             return
@@ -171,7 +172,7 @@ function cardValueHistScoring (cardValueHist, cards) {
             value2 = value of second pair,
             kicker1 = most value card
             */
-            return [TWO_PAIR, [winningCard, cardValueHist.lastIndexOf(2), cards[0].cardValue]];
+            return [TWO_PAIR, [winningCard, cardValueHistTemp.lastIndexOf(2), cards[0].cardValue]];
         }
 
         /*
