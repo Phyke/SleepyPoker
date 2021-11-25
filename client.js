@@ -392,3 +392,7 @@ input_username.addEventListener("keydown", (event) => {
     }
 });
 
+window.onbeforeunload = (event) => {
+    event.preventDefault();
+    event.returnValue = '';
+}

@@ -57,6 +57,11 @@ tr,th,td {
     width: 50%;
 }
 
+#id_logo {
+    font-weight: bold;
+    text-align: center;
+}
+
 #id_zone_playerInfo {
     padding-left: 20px;
     padding-right: 20px;
