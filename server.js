@@ -408,7 +408,7 @@ function restartGame() {
 
     //kick player who has not enought money
     for(let i = 0; i < players.length; i++) {
-        if(players[i].wallet < highestBet) {
+        if(players[i].wallet < minimumBet) {
             playerSockets[i].emit('kickEmptyWallet');
             players.splice(i, 1);
             playerSockets.splice(i, 1);
