@@ -105,7 +105,7 @@ io.on('connect', (socket) => {
         socket.on('startGame', () => {
             //reset game parameter
             playerTurn = 0;
-            raiseTurn = players.length;
+            raiseTurn = players.length - 1;
             round = 0;
             allPlayerScore = [];
             gameStarted = true;
@@ -139,26 +139,30 @@ io.on('connect', (socket) => {
             else
                 raiseTurn--;
 
-            console.log('raiseTurn = ', raiseTurn);
+            console.log('notice: now raiseTurn = ', raiseTurn);
 
-            //when all player played in this round
-            while(raiseTurn < 0 && round < 3) {
-                //round counter increase
+            //when all player played in this round, or there is only 1 player left
+            if(raiseTurn < 0) {
+                //new round
                 round++;
 
+                //there is only 1 player left
+                while(activePlayer < 1 && round < 3) {
+                    io.sockets.emit('addTableCard',tableCards[round + 2]);
+                    round++;
+                }
+                
                 //reached round 4, game end
                 if(round == 3)
                     io.sockets.emit('gameEnded', hostDisconnectStatus);
-
-                //start new round
-                else {
-                    //turn count = number of active player
-                    raiseTurn = activePlayer;
-                    console.log('notice: new round: ', round, ' raiseTurn: ', raiseTurn);
-
-                    //add new table card for new round
+                
+                //not reached round 4, send new table card to player
+                else 
                     io.sockets.emit('addTableCard',tableCards[round + 2]);
-                }
+                
+                //new turn counter for this round
+                raiseTurn = activePlayer;
+                console.log('notice: new round: ', round, ' raiseTurn: ', raiseTurn);
             }
 
             //game is not ended, go to next turn
@@ -402,9 +406,9 @@ function restartGame() {
     //game ended
     gameStarted = false;
 
-    //kick player who has zero wallet
+    //kick player who has not enought money
     for(let i = 0; i < players.length; i++) {
-        if(players[i].wallet == 0) {
+        if(players[i].wallet < highestBet) {
             playerSockets[i].emit('kickEmptyWallet');
             players.splice(i, 1);
             playerSockets.splice(i, 1);
